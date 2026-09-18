@@ -12,7 +12,7 @@ import firebase_app_check
 import firebase_auth
 import firebase_core
 import geolocator_apple
-import isar_flutter_libs
+import isar_community_flutter_libs
 import package_info_plus
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
