@@ -34,4 +34,25 @@ class LocalObservationRepository {
         .sortByCreatedAtDesc()
         .findAll();
   }
+
+  Future<void> markAsSynchronized(int observationId) async {
+    final observation = await _isar.animalObservationEntitys.get(observationId);
+
+    if (observation == null) {
+      throw Exception('Local observation not found.');
+    }
+
+    observation.isSynchronized = true;
+
+    await _isar.writeTxn(() async {
+      await _isar.animalObservationEntitys.put(observation);
+    });
+  }
+
+  Future<List<AnimalObservationEntity>> getUnsynchronizedObservations() {
+    return _isar.animalObservationEntitys
+        .filter()
+        .isSynchronizedEqualTo(false)
+        .findAll();
+  }
 }
