@@ -4,6 +4,7 @@ import 'package:pawtrol/src/views/app/animals/animals_view.dart';
 import 'package:pawtrol/src/views/app/animals/id/animal_view.dart';
 import 'package:pawtrol/src/views/app/profile/profile_view.dart';
 import 'package:pawtrol/src/views/app/scan/animal_test.dart';
+import 'package:pawtrol/src/views/app/scan/firestore_test.dart';
 import 'package:pawtrol/src/views/app/scan/isar_test.dart';
 import 'package:pawtrol/src/views/app/scan/location_test.dart';
 import 'package:pawtrol/src/views/auth/login_view.dart';
@@ -111,6 +112,12 @@ final appRouter = GoRouter(
           path: '/isar-test',
           builder: (context, state) {
             return const IsarTestView();
+          },
+        ),
+        GoRoute(
+          path: '/firestore-test',
+          builder: (context, state) {
+            return const FirestoreTestView();
           },
         ),
       ],

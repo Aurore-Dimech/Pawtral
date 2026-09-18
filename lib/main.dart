@@ -21,23 +21,6 @@ void main() async {
     appleProvider: AppleProvider.debug,
   );
 
-  // var db = FirebaseFirestore.instance;
-
-  // db
-  //     .collection("jokes")
-  //     .add({
-  //       'setup': 'Why did the scarecrow win an award?',
-  //       'punchline': 'Because he was outstanding in his field!',
-  //       'type': 'general',
-  //       'id': 1,
-  //     })
-  //     .then((DocumentReference doc) {
-  //       print('Document added with ID: ${doc.id}');
-  //     })
-  //     .catchError((error) {
-  //       print('Error adding document: $error');
-  //     });
-
   // final model = FirebaseAI.googleAI().generativeModel(
   //   model: 'gemini-3.5-flash',
   // );

@@ -1,34 +1,35 @@
 import 'package:isar/isar.dart';
 
-import '../data/local/animal_information_entity.dart';
+import '../data/local/animal_observation_entity.dart';
 
-class LocalInformationRepository {
-  const LocalInformationRepository(this._isar);
+class LocalObservationRepository {
+  const LocalObservationRepository(this._isar);
 
   final Isar _isar;
 
-  Future<int> addInformation({
+  Future<int> addObservation({
     required String animalName,
     required String imagePath,
     double? latitude,
     double? longitude,
   }) async {
-    final information = AnimalInformationEntity()
+    final observation = AnimalObservationEntity()
       ..animalName = animalName
       ..imagePath = imagePath
       ..createdAt = DateTime.now()
+      ..isSynchronized = false
       ..latitude = latitude
       ..longitude = longitude;
 
     await _isar.writeTxn(() async {
-      await _isar.animalInformationEntitys.put(information);
+      await _isar.animalObservationEntitys.put(observation);
     });
 
-    return information.id;
+    return observation.id;
   }
 
-  Future<List<AnimalInformationEntity>> getAllInformation() {
-    return _isar.animalInformationEntitys
+  Future<List<AnimalObservationEntity>> getAllObservations() {
+    return _isar.animalObservationEntitys
         .where()
         .sortByCreatedAtDesc()
         .findAll();
