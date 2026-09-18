@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pawtrol/src/views/app/animals/animals_view.dart';
 import 'package:pawtrol/src/views/app/animals/id/animal_view.dart';
 import 'package:pawtrol/src/views/app/profile/profile_view.dart';
+import 'package:pawtrol/src/views/app/scan/location_test.dart';
 import 'package:pawtrol/src/views/auth/login_view.dart';
 import 'package:pawtrol/src/views/auth/onboarding_view.dart';
 import 'package:pawtrol/src/views/auth/register_view.dart';
@@ -90,6 +91,12 @@ final appRouter = GoRouter(
           path: '/picture-test',
           builder: (context, state) {
             return const PictureTestView();
+          },
+        ),
+        GoRoute(
+          path: '/localisation-test',
+          builder: (context, state) {
+            return const LocationTestView();
           },
         ),
       ],
