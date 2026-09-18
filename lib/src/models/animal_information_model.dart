@@ -1,5 +1,5 @@
-class AnimalObservation {
-  const AnimalObservation({
+class AnimalInformation {
+  const AnimalInformation({
     required this.id,
     required this.animalName,
     required this.imagePath,
