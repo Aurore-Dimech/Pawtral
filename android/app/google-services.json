@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "949608473250",
+    "project_id": "pawtral-d6340",
+    "storage_bucket": "pawtral-d6340.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:949608473250:android:1f865e64973611543e6dfb",
+        "android_client_info": {
+          "package_name": "com.aurored.pawtrol"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmDNk9iktEMf-vz4WxnTw41vh897wRhxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
