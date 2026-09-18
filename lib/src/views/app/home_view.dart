@@ -20,6 +20,13 @@ class HomeView extends StatelessWidget {
               onPressed: () => context.push('/localisation-test'),
               child: Text("test nav"),
             ),
+            TextButton.icon(
+              onPressed: () {
+                context.push('/animal-test');
+              },
+              icon: const Icon(Icons.cloud_download),
+              label: const Text('Test animal API'),
+            ),
           ],
         ),
       ),

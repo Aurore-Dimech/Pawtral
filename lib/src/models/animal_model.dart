@@ -1,3 +1,7 @@
+String readString(Map<String, dynamic> json, String key) {
+  return json[key] as String? ?? '';
+}
+
 class Animal {
   final String name;
   final Taxonomy taxonomy;
@@ -13,11 +17,13 @@ class Animal {
 
   factory Animal.fromJson(Map<String, dynamic> json) {
     return Animal(
-      name: json['name'] as String,
-      taxonomy: Taxonomy.fromJson(json['taxonomy'] as Map<String, dynamic>),
-      locations: List<String>.from(json['locations'] as List<dynamic>),
+      name: json['name'] as String? ?? '',
+      taxonomy: Taxonomy.fromJson(
+        json['taxonomy'] as Map<String, dynamic>? ?? {},
+      ),
+      locations: List<String>.from(json['locations'] as List? ?? const []),
       characteristics: Characteristics.fromJson(
-        json['characteristics'] as Map<String, dynamic>,
+        json['characteristics'] as Map<String, dynamic>? ?? {},
       ),
     );
   }
@@ -44,13 +50,13 @@ class Taxonomy {
 
   factory Taxonomy.fromJson(Map<String, dynamic> json) {
     return Taxonomy(
-      kingdom: json['kingdom'] as String,
-      phylum: json['phylum'] as String,
-      animalClass: json['class'] as String,
-      order: json['order'] as String,
-      family: json['family'] as String,
-      genus: json['genus'] as String,
-      scientificName: json['scientific_name'] as String,
+      kingdom: readString(json, 'kingdom'),
+      phylum: readString(json, 'phylum'),
+      animalClass: readString(json, 'class'),
+      order: readString(json, 'order'),
+      family: readString(json, 'family'),
+      genus: readString(json, 'genus'),
+      scientificName: readString(json, 'scientific_name'),
     );
   }
 }
@@ -110,30 +116,30 @@ class Characteristics {
 
   factory Characteristics.fromJson(Map<String, dynamic> json) {
     return Characteristics(
-      prey: json['prey'] as String,
-      nameOfYoung: json['name_of_young'] as String,
-      groupBehavior: json['group_behavior'] as String,
-      estimatedPopulationSize: json['estimated_population_size'] as String,
-      biggestThreat: json['biggest_threat'] as String,
-      mostDistinctiveFeature: json['most_distinctive_feature'] as String,
-      gestationPeriod: json['gestation_period'] as String,
-      habitat: json['habitat'] as String,
-      diet: json['diet'] as String,
-      averageLitterSize: json['average_litter_size'] as String,
-      lifestyle: json['lifestyle'] as String,
-      commonName: json['common_name'] as String,
-      numberOfSpecies: json['number_of_species'] as String,
-      location: json['location'] as String,
-      slogan: json['slogan'] as String,
-      group: json['group'] as String,
-      color: json['color'] as String,
-      skinType: json['skin_type'] as String,
-      topSpeed: json['top_speed'] as String,
-      lifespan: json['lifespan'] as String,
-      weight: json['weight'] as String,
-      height: json['height'] as String,
-      ageOfSexualMaturity: json['age_of_sexual_maturity'] as String,
-      ageOfWeaning: json['age_of_weaning'] as String,
+      prey: readString(json, 'prey'),
+      nameOfYoung: readString(json, 'name_of_young'),
+      groupBehavior: readString(json, 'group_behavior'),
+      estimatedPopulationSize: readString(json, 'estimated_population_size'),
+      biggestThreat: readString(json, 'biggest_threat'),
+      mostDistinctiveFeature: readString(json, 'most_distinctive_feature'),
+      gestationPeriod: readString(json, 'gestation_period'),
+      habitat: readString(json, 'habitat'),
+      diet: readString(json, 'diet'),
+      averageLitterSize: readString(json, 'average_litter_size'),
+      lifestyle: readString(json, 'lifestyle'),
+      commonName: readString(json, 'common_name'),
+      numberOfSpecies: readString(json, 'number_of_species'),
+      location: readString(json, 'location'),
+      slogan: readString(json, 'slogan'),
+      group: readString(json, 'group'),
+      color: readString(json, 'color'),
+      skinType: readString(json, 'skin_type'),
+      topSpeed: readString(json, 'top_speed'),
+      lifespan: readString(json, 'lifespan'),
+      weight: readString(json, 'weight'),
+      height: readString(json, 'height'),
+      ageOfSexualMaturity: readString(json, 'age_of_sexual_maturity'),
+      ageOfWeaning: readString(json, 'age_of_weaning'),
     );
   }
 }

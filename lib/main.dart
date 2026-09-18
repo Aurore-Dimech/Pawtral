@@ -20,16 +20,15 @@ void main() async {
     appleProvider: AppleProvider.debug,
   );
 
-  final model = FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-3.5-flash',
-  );
+  // final model = FirebaseAI.googleAI().generativeModel(
+  //   model: 'gemini-3.5-flash',
+  // );
 
-  final prompt = [Content.text('Write a story about a magic backpack.')];
+  // final prompt = [Content.text('Write a story about a magic backpack.')];
 
   // To generate text output, call generateContent with the text input
   // final response = await model.generateContent(prompt);
   // print(response.text);
-  print("pawtral-test-print");
 
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
