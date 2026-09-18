@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,6 +20,23 @@ void main() async {
         : AndroidProvider.playIntegrity,
     appleProvider: AppleProvider.debug,
   );
+
+  // var db = FirebaseFirestore.instance;
+
+  // db
+  //     .collection("jokes")
+  //     .add({
+  //       'setup': 'Why did the scarecrow win an award?',
+  //       'punchline': 'Because he was outstanding in his field!',
+  //       'type': 'general',
+  //       'id': 1,
+  //     })
+  //     .then((DocumentReference doc) {
+  //       print('Document added with ID: ${doc.id}');
+  //     })
+  //     .catchError((error) {
+  //       print('Error adding document: $error');
+  //     });
 
   // final model = FirebaseAI.googleAI().generativeModel(
   //   model: 'gemini-3.5-flash',

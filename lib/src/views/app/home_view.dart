@@ -27,6 +27,13 @@ class HomeView extends StatelessWidget {
               icon: const Icon(Icons.cloud_download),
               label: const Text('Test animal API'),
             ),
+            TextButton.icon(
+              onPressed: () {
+                context.push('/isar-test');
+              },
+              icon: const Icon(Icons.storage),
+              label: const Text('Test offline storage'),
+            ),
           ],
         ),
       ),

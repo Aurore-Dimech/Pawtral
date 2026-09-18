@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class OnboardingView extends StatelessWidget {
-  const new({super.key});
+  const OnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
