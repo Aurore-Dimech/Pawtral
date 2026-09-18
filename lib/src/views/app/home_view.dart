@@ -13,7 +13,7 @@ class HomeView extends StatelessWidget {
           children: [
             Text("home"),
             TextButton(
-              onPressed: () => context.push('/auth'),
+              onPressed: () => context.push('/picture-test'),
               child: Text("test nav"),
             ),
           ],

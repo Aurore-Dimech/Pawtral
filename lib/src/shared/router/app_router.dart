@@ -8,6 +8,7 @@ import 'package:pawtrol/src/views/auth/onboarding_view.dart';
 import 'package:pawtrol/src/views/auth/register_view.dart';
 import 'package:pawtrol/src/views/app/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pawtrol/src/views/app/scan/picture_test.dart';
 
 import 'dart:async';
 
@@ -85,6 +86,12 @@ final appRouter = GoRouter(
           ],
         ),
         GoRoute(path: '/profile', builder: (context, state) => ProfileView()),
+        GoRoute(
+          path: '/picture-test',
+          builder: (context, state) {
+            return const PictureTestView();
+          },
+        ),
       ],
     ),
   ],

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 class AnimalsView extends StatelessWidget {
-  const new({super.key});
+  const AnimalsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Scaffold(
+      body: Center(
+        child: Text('Animals'),
+      ),
+    );
   }
 }
