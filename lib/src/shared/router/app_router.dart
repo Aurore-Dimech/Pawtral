@@ -13,6 +13,7 @@ import 'package:pawtrol/src/views/auth/register_view.dart';
 import 'package:pawtrol/src/views/app/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pawtrol/src/views/app/scan/picture_test.dart';
+import 'package:pawtrol/src/views/app/scan/scan_view.dart';
 
 import 'dart:async';
 
@@ -118,6 +119,12 @@ final appRouter = GoRouter(
           path: '/firestore-test',
           builder: (context, state) {
             return const FirestoreTestView();
+          },
+        ),
+        GoRoute(
+          path: '/scan',
+          builder: (context, state) {
+            return const ScanView();
           },
         ),
       ],

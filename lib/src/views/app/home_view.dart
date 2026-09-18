@@ -41,6 +41,14 @@ class HomeView extends StatelessWidget {
               icon: const Icon(Icons.cloud_upload),
               label: const Text('Test Firestore'),
             ),
+
+            TextButton.icon(
+              onPressed: () {
+                context.push('/scan');
+              },
+              icon: const Icon(Icons.add_a_photo),
+              label: const Text('New observation'),
+            ),
           ],
         ),
       ),
