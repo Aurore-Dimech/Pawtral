@@ -1,65 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pawtrol/src/shared/theme/app_colors.dart';
+import 'package:pawtrol/src/widgets/slider_button.dart/slider_button.dart';
 
 class OnboardingView extends StatelessWidget {
   const OnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Background:
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: [Colors.white, Colors.transparent],
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-          ).createShader(bounds),
-          blendMode: BlendMode.lighten,
-          child: Container(
-            decoration: BoxDecoration(
-              image: const DecorationImage(
-                image: AssetImage("assets/images/OnBoarding.png"),
-                fit: BoxFit.cover,
-                // colorFilter: ColorFilter.mode(Colors.white, BlendMode.lighten),
-              ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          // Background image:
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/OnBoarding.png',
+              fit: BoxFit.cover,
             ),
           ),
-        ),
 
-        // Content:
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Gradient:
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 600,
+            child: Column(
               children: [
-                Column(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Pawtral", style: TextStyle(fontSize: 24)),
-                        Text(
-                          "Prenez en photo les animaux que vous rencontrez, et rajoutez les à votre collection personnelle !",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ],
+                Container(
+                  height: 240,
+                  color: Colors.white.withValues(alpha: 0.95),
                 ),
-                TextButton(
-                  style: ButtonStyle(),
-                  onPressed: () => context.push('/auth/login'),
-                  child: Text("Se connecter"),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.95),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+
+          // Content:
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(right: 60),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.pets_outlined,
+                          size: 40,
+                          color: AppColors.primaryColor,
+                        ),
+                        SizedBox(height: 12),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Discover all ",
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(text: "about "),
+                              TextSpan(
+                                text: "the animals",
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(text: "' world"),
+                            ],
+                          ),
+                          style: TextStyle(
+                            fontSize: 32,
+                            color: AppColors.textColor,
+                            fontWeight: FontWeight.w300,
+                            height: 1,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'Take pictures of all the animals that share your life, learn about them, and add them to your collection!',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textColor,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SliderButton(
+                    onSlided: () => context.push('/auth/login'),
+                    text:'Start your pawtrol',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

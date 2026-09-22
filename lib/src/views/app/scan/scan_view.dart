@@ -74,6 +74,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
     });
 
     try {
+      // TODO: remplacer par redirection vers la page Animal sur laquelle il y a un bouton pour sauvegarder l'animal
       final workflow =
           await ref.read(observationWorkflowProvider.future);
 
