@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pawtrol/src/shared/theme/app_colors.dart';
 
 class ErrorView extends StatelessWidget {
   final Exception? error;
@@ -8,6 +9,7 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -16,7 +18,11 @@ class ErrorView extends StatelessWidget {
             SizedBox(height: 24),
             Text(
               "404 - Page not found",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                color: AppColors.textColor,
+              ),
             ),
             SizedBox(height: 24),
             Text(
@@ -24,7 +30,15 @@ class ErrorView extends StatelessWidget {
               style: TextStyle(color: Colors.grey.shade600),
             ),
             SizedBox(height: 24),
-            ElevatedButton(onPressed: () => context.go("/"), child: Text("Back to Homepage"))
+            ElevatedButton(
+              onPressed: () => context.go("/"),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  return AppColors.primaryColor;
+                }),
+              ),
+              child: Text("Back to Homepage", style: TextStyle(color: Colors.white),),
+            ),
           ],
         ),
       ),

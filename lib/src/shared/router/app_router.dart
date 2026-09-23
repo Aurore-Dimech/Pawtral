@@ -80,13 +80,13 @@ final appRouter = GoRouter(
           ],
         ),
         GoRoute(path: '/profile', builder: (context, state) => ProfileView()),
-        GoRoute(
-          path: '/scan',
-          builder: (context, state) {
-            return const ScanView();
-          },
-        ),
       ],
+    ),
+    GoRoute(
+      path: '/scan',
+      builder: (context, state) {
+        return const ScanView();
+      },
     ),
   ],
 );

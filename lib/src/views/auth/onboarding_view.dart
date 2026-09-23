@@ -56,7 +56,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 children: [
                   Container(
                     height: 240,
-                    color: AppColors.backgroundColor.withValues(alpha: 0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                   ),
                   Expanded(
                     child: Container(
@@ -65,7 +65,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.backgroundColor.withValues(alpha: 0.95),
+                            Colors.white.withValues(alpha: 0.95),
                             Colors.transparent,
                           ],
                         ),

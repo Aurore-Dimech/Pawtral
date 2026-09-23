@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pawtrol/src/models/user_model.dart';
 
 class AuthServices {
   final _auth = FirebaseAuth.instance;
@@ -79,5 +80,17 @@ class AuthServices {
       'createdAt': Timestamp.fromDate(createdAt),
       'synchronizedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
+  }
+
+  Future<AppUser?> getProfileInformation(String userId) async {
+    final document = await _firestore.collection('users').doc(userId).get();
+
+    final data = document.data();
+
+    if (data == null) {
+      return null;
+    }
+
+    return AppUser.fromFirestore(document.id, data);
   }
 }
