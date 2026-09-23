@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../repositories/local_observation_repository.dart';
 import 'firestore_service.dart';
-
-import 'package:flutter/foundation.dart';
 
 class ObservationSyncService {
   const ObservationSyncService({
@@ -14,6 +14,47 @@ class ObservationSyncService {
   final LocalObservationRepository localRepository;
   final FirestoreService firestoreService;
 
+  Future<void> synchronize() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    await synchronizePending();
+
+    try {
+      final remoteObservations = await firestoreService.getObservations(
+        user.uid,
+      );
+
+      for (final observation in remoteObservations) {
+        final animalName = observation['animalName'];
+        final imagePath = observation['imagePath'];
+        final createdAt = observation['createdAt'];
+
+        if (animalName is! String ||
+            imagePath is! String ||
+            createdAt is! Timestamp) {
+          continue;
+        }
+
+        await localRepository.saveRemoteObservation(
+          userId: user.uid,
+          animalName: animalName,
+          imagePath: imagePath,
+          createdAt: createdAt.toDate(),
+          latitude: (observation['latitude'] as num?)?.toDouble(),
+          longitude: (observation['longitude'] as num?)?.toDouble(),
+        );
+      }
+
+    } catch (error, stackTrace) {
+      debugPrint('Firestore observation download failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   Future<void> synchronizePending() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -21,7 +62,9 @@ class ObservationSyncService {
       return;
     }
 
-    final observations = await localRepository.getUnsynchronizedObservations();
+    final observations = await localRepository.getUnsynchronizedObservations(
+      user.uid,
+    );
 
     for (final observation in observations) {
       try {

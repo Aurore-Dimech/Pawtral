@@ -8,12 +8,14 @@ class LocalObservationRepository {
   final Isar _isar;
 
   Future<int> addObservation({
+    required String userId,
     required String animalName,
     required String imagePath,
     double? latitude,
     double? longitude,
   }) async {
     final observation = AnimalObservationEntity()
+      ..userId = userId
       ..animalName = animalName
       ..imagePath = imagePath
       ..createdAt = DateTime.now()
@@ -28,11 +30,46 @@ class LocalObservationRepository {
     return observation.id;
   }
 
-  Future<List<AnimalObservationEntity>> getAllObservations() {
+  Future<List<AnimalObservationEntity>> getAllObservations(String userId) {
     return _isar.animalObservationEntitys
-        .where()
+        .filter()
+        .userIdEqualTo(userId)
         .sortByCreatedAtDesc()
         .findAll();
+  }
+
+  Future<void> saveRemoteObservation({
+    required String userId,
+    required String animalName,
+    required String imagePath,
+    required DateTime createdAt,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final existing = await getAllObservations(userId);
+    final alreadySaved = existing.any(
+      (observation) =>
+          observation.animalName == animalName &&
+          observation.imagePath == imagePath &&
+          observation.createdAt == createdAt,
+    );
+
+    if (alreadySaved) {
+      return;
+    }
+
+    final observation = AnimalObservationEntity()
+      ..userId = userId
+      ..animalName = animalName
+      ..imagePath = imagePath
+      ..createdAt = createdAt
+      ..isSynchronized = true
+      ..latitude = latitude
+      ..longitude = longitude;
+
+    await _isar.writeTxn(() async {
+      await _isar.animalObservationEntitys.put(observation);
+    });
   }
 
   Future<void> markAsSynchronized(int observationId) async {
@@ -49,10 +86,18 @@ class LocalObservationRepository {
     });
   }
 
-  Future<List<AnimalObservationEntity>> getUnsynchronizedObservations() {
+  Future<List<AnimalObservationEntity>> getUnsynchronizedObservations(
+    String userId,
+  ) {
     return _isar.animalObservationEntitys
         .filter()
+        .userIdEqualTo(userId)
+        .and()
         .isSynchronizedEqualTo(false)
         .findAll();
+  }
+
+  Future<AnimalObservationEntity?> getById(int observationId) {
+    return _isar.animalObservationEntitys.get(observationId);
   }
 }

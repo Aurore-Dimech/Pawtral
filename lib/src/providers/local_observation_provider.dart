@@ -4,6 +4,8 @@ import 'package:isar_community/isar.dart';
 import '../data/local/animal_observation_entity.dart';
 import '../data/local/isar_database.dart';
 import '../repositories/local_observation_repository.dart';
+import '../services/observation_sync_service.dart';
+import 'firestore_provider.dart';
 
 final isarProvider = FutureProvider<Isar>((ref) async {
   final database = IsarDatabase();
@@ -18,15 +20,35 @@ final isarProvider = FutureProvider<Isar>((ref) async {
 
 final localObservationRepositoryProvider =
     FutureProvider<LocalObservationRepository>((ref) async {
-  final isar = await ref.watch(isarProvider.future);
+      final isar = await ref.watch(isarProvider.future);
 
-  return LocalObservationRepository(isar);
+      return LocalObservationRepository(isar);
+    });
+
+final observationSyncServiceProvider = FutureProvider<ObservationSyncService>((
+  ref,
+) async {
+  final repository = await ref.watch(localObservationRepositoryProvider.future);
+
+  return ObservationSyncService(
+    localRepository: repository,
+    firestoreService: ref.watch(firestoreServiceProvider),
+  );
 });
 
 final localObservationsProvider =
-    FutureProvider<List<AnimalObservationEntity>>((ref) async {
-  final repository =
-      await ref.watch(localObservationRepositoryProvider.future);
+    FutureProvider.family<List<AnimalObservationEntity>, String>((
+      ref,
+      userId,
+    ) async {
+      final syncService = await ref.watch(
+        observationSyncServiceProvider.future,
+      );
+      await syncService.synchronize();
 
-  return repository.getAllObservations();
-});
+      final repository = await ref.watch(
+        localObservationRepositoryProvider.future,
+      );
+
+      return repository.getAllObservations(userId);
+    });

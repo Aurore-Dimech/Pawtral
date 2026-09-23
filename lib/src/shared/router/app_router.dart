@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pawtrol/src/models/animal_model.dart';
 import 'package:pawtrol/src/views/app/animals/animals_view.dart';
 import 'package:pawtrol/src/views/app/animals/id/animal_view.dart';
 import 'package:pawtrol/src/views/app/error/error_view.dart';
@@ -67,14 +68,23 @@ final appRouter = GoRouter(
         GoRoute(path: '/', builder: (context, state) => const HomeView()),
         GoRoute(
           path: '/animals',
-          builder: (context, state) => AnimalsView(),
+          builder: (context, state) {
+            return const AnimalsView();
+          },
           routes: [
             GoRoute(
-              path: 'animal',
+              path: 'detail',
               builder: (context, state) {
-                // final animal = state.extra as Animal;
-                // return const AnimalView(animal: animal);
-                return const AnimalView();
+                final animal = state.extra;
+
+                if (animal is! Animal) {
+                  return ErrorView(
+                    error: Exception('Animal information is missing.'),
+                  );
+                }
+
+                // return AnimalView(animal: animal);
+                return AnimalView();
               },
             ),
           ],

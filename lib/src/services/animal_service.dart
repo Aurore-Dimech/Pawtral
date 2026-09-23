@@ -42,4 +42,17 @@ class AnimalService {
       );
     }
   }
+
+  Future<String?> fetchRandomImage(String animal) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        'https://animals.maxz.dev/api/${Uri.encodeComponent(animal)}/random',
+      );
+
+      final image = response.data?['image'];
+      return image is String && image.isNotEmpty ? image : null;
+    } on DioException {
+      return null;
+    }
+  }
 }

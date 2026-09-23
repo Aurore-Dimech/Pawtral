@@ -6,6 +6,16 @@ class FirestoreService {
 
   final FirebaseFirestore _firestore;
 
+  Future<List<Map<String, dynamic>>> getObservations(String userId) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('observations')
+        .get();
+
+    return snapshot.docs.map((document) => document.data()).toList();
+  }
+
   Future<void> saveObservation({
     required String userId,
     required String observationId,

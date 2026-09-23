@@ -44,11 +44,18 @@ class ObservationWorkflowService {
     final position = await locationService.getCurrentPosition();
 
     final observationId = await localObservationRepository.addObservation(
+      userId: userId,
       animalName: animalName,
       imagePath: localImage.path,
       latitude: position?.latitude,
       longitude: position?.longitude,
     );
+
+    final observation = await localObservationRepository.getById(observationId);
+
+    if (observation == null) {
+      throw Exception('The local observation could not be found.');
+    }
 
     try {
       await firestoreService.saveObservation(
@@ -56,7 +63,7 @@ class ObservationWorkflowService {
         observationId: observationId.toString(),
         animalName: animalName,
         imagePath: localImage.path,
-        createdAt: DateTime.now(),
+        createdAt: observation.createdAt,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );

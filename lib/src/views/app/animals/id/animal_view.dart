@@ -7,7 +7,7 @@ class AnimalView extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Animal details'),
+        child: Text('Animal'),
       ),
     );
   }

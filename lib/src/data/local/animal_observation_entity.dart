@@ -6,6 +6,7 @@ part 'animal_observation_entity.g.dart';
 class AnimalObservationEntity {
   Id id = Isar.autoIncrement;
 
+  late String userId;
   late String animalName;
   late String imagePath;
   late DateTime createdAt;

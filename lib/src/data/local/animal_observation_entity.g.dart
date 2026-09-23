@@ -48,6 +48,7 @@ const AnimalObservationEntitySchema = CollectionSchema(
       name: r'longitude',
       type: IsarType.double,
     ),
+    r'userId': PropertySchema(id: 6, name: r'userId', type: IsarType.string),
   },
 
   estimateSize: _animalObservationEntityEstimateSize,
@@ -73,6 +74,7 @@ int _animalObservationEntityEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.animalName.length * 3;
   bytesCount += 3 + object.imagePath.length * 3;
+  bytesCount += 3 + object.userId.length * 3;
   return bytesCount;
 }
 
@@ -88,6 +90,7 @@ void _animalObservationEntitySerialize(
   writer.writeBool(offsets[3], object.isSynchronized);
   writer.writeDouble(offsets[4], object.latitude);
   writer.writeDouble(offsets[5], object.longitude);
+  writer.writeString(offsets[6], object.userId);
 }
 
 AnimalObservationEntity _animalObservationEntityDeserialize(
@@ -104,6 +107,7 @@ AnimalObservationEntity _animalObservationEntityDeserialize(
   object.isSynchronized = reader.readBool(offsets[3]);
   object.latitude = reader.readDoubleOrNull(offsets[4]);
   object.longitude = reader.readDoubleOrNull(offsets[5]);
+  object.userId = reader.readString(offsets[6]);
   return object;
 }
 
@@ -126,6 +130,8 @@ P _animalObservationEntityDeserializeProp<P>(
       return (reader.readDoubleOrNull(offset)) as P;
     case 5:
       return (reader.readDoubleOrNull(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1011,6 +1017,187 @@ extension AnimalObservationEntityQueryFilter
       );
     });
   }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'userId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'userId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'userId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  userIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'userId', value: ''),
+      );
+    });
+  }
 }
 
 extension AnimalObservationEntityQueryObject
@@ -1112,6 +1299,20 @@ extension AnimalObservationEntityQuerySortBy
   sortByLongitudeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'longitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
     });
   }
 }
@@ -1220,6 +1421,20 @@ extension AnimalObservationEntityQuerySortThenBy
       return query.addSortBy(r'longitude', Sort.desc);
     });
   }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
+    });
+  }
 }
 
 extension AnimalObservationEntityQueryWhereDistinct
@@ -1268,6 +1483,13 @@ extension AnimalObservationEntityQueryWhereDistinct
   distinctByLongitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'longitude');
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QDistinct>
+  distinctByUserId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1324,6 +1546,13 @@ extension AnimalObservationEntityQueryProperty
   longitudeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'longitude');
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, String, QQueryOperations>
+  userIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userId');
     });
   }
 }
