@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pawtrol/src/models/animal_model.dart';
 import 'package:pawtrol/src/views/app/animals/animals_view.dart';
 import 'package:pawtrol/src/views/app/animals/id/animal_view.dart';
 import 'package:pawtrol/src/views/app/error/error_view.dart';
 import 'package:pawtrol/src/views/app/profile/profile_view.dart';
-import 'package:pawtrol/src/views/auth/login_view.dart';
+import 'package:pawtrol/src/views/auth/auth_view.dart';
 import 'package:pawtrol/src/views/auth/onboarding_view.dart';
-import 'package:pawtrol/src/views/auth/register_view.dart';
 import 'package:pawtrol/src/views/app/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pawtrol/src/views/app/scan/scan_view.dart';
@@ -58,11 +56,7 @@ final appRouter = GoRouter(
       path: '/auth',
       builder: (context, state) => const OnboardingView(),
       routes: [
-        GoRoute(path: 'login', builder: (context, state) => const LoginView()),
-        GoRoute(
-          path: 'register',
-          builder: (context, state) => const RegisterView(),
-        ),
+        GoRoute(path: 'login', builder: (context, state) => const AuthView()),
       ],
     ),
     ShellRoute(

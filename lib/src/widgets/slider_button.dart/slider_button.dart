@@ -133,7 +133,6 @@ class _SliderButtonState extends State<SliderButton>
         ),
         ClipRRect(
           child: BackdropFilter(
-            // Controls the intensity of the flutter container blur
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
 
             child: Container(

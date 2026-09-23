@@ -1,8 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthServices {
   final _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore;
+
+  AuthServices({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<UserCredential?> signUpWithEmail(String email, String password) async {
     try {
@@ -60,5 +65,19 @@ class AuthServices {
 
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  Future<void> saveProfileInformation({
+    required String userId,
+    required String name,
+    required String email,
+    required DateTime createdAt,
+  }) async {
+    await _firestore.collection('users').doc(userId).set({
+      'name': name,
+      'email': email,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'synchronizedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 }
