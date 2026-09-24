@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pawtrol/src/models/user_model.dart';
 
+class ReauthenticationRequiredException implements Exception {
+  const ReauthenticationRequiredException();
+}
+
 class AuthServices {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore;
@@ -92,5 +96,56 @@ class AuthServices {
     }
 
     return AppUser.fromFirestore(document.id, data);
+  }
+
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+
+    try {
+      await _deleteAccountData(user);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw const ReauthenticationRequiredException();
+      }
+      throw _handleFirebaseError(e);
+    }
+  }
+
+  Future<void> reauthenticateAndDeleteAccount({
+    required String password,
+  }) async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+
+    final email = user.email;
+
+    if (email == null) {
+      throw Exception(
+        'This account has no email on file, so it cannot be re-authenticated this way.',
+      );
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await _deleteAccountData(user);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseError(e);
+    }
+  }
+
+  Future<void> _deleteAccountData(User user) async {
+    await _firestore.collection('users').doc(user.uid).delete();
+    await user.delete();
   }
 }

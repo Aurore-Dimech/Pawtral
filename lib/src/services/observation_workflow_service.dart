@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../repositories/local_observation_repository.dart';
@@ -29,28 +26,28 @@ class ObservationWorkflowService {
   final LocationService locationService;
   final LocalObservationRepository localObservationRepository;
 
-  Future<int> processPicture({
-    required XFile picture,
-    required String userId,
-  }) async {
+  Future<ObservationDraft> analyzePicture({required XFile picture}) async {
     final localImage = await localFileService.copyToApplicationDirectory(
       picture,
     );
-
     final animalName = await animalAiService.identifyAnimal(localImage);
-
     await animalService.fetchAnimal(animalName);
 
-    final position = await locationService.getCurrentPosition();
+    return ObservationDraft(animalName: animalName, imagePath: localImage.path);
+  }
 
+  Future<int> saveDraft({
+    required ObservationDraft draft,
+    required String userId,
+  }) async {
+    final position = await locationService.getCurrentPosition();
     final observationId = await localObservationRepository.addObservation(
       userId: userId,
-      animalName: animalName,
-      imagePath: localImage.path,
+      animalName: draft.animalName,
+      imagePath: draft.imagePath,
       latitude: position?.latitude,
       longitude: position?.longitude,
     );
-
     final observation = await localObservationRepository.getById(observationId);
 
     if (observation == null) {
@@ -61,13 +58,12 @@ class ObservationWorkflowService {
       await firestoreService.saveObservation(
         userId: userId,
         observationId: observationId.toString(),
-        animalName: animalName,
-        imagePath: localImage.path,
+        animalName: draft.animalName,
+        imagePath: draft.imagePath,
         createdAt: observation.createdAt,
         latitude: position?.latitude,
         longitude: position?.longitude,
       );
-
       await localObservationRepository.markAsSynchronized(observationId);
     } catch (error, stackTrace) {
       debugPrint('Firestore synchronization failed: $error');
@@ -76,4 +72,19 @@ class ObservationWorkflowService {
 
     return observationId;
   }
+
+  Future<int> processPicture({
+    required XFile picture,
+    required String userId,
+  }) async {
+    final draft = await analyzePicture(picture: picture);
+    return saveDraft(draft: draft, userId: userId);
+  }
+}
+
+class ObservationDraft {
+  const ObservationDraft({required this.animalName, required this.imagePath});
+
+  final String animalName;
+  final String imagePath;
 }

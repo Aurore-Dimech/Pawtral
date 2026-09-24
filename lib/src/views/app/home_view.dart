@@ -213,40 +213,45 @@ class _HomeContent extends ConsumerWidget {
                                               ),
                                             ),
 
-                                            const VerticalDivider(
-                                              width: 24,
-                                              thickness: 1,
-                                              color: Colors.white24,
-                                            ),
-
-                                            Expanded(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    lastObservation
-                                                            ?.animalName ??
-                                                        'None',
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 32,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const Text(
-                                                    'is the last animal seen',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
+                                            if (lastObservation != null &&
+                                                lastObservation
+                                                    .animalName
+                                                    .isNotEmpty) ...[
+                                              const VerticalDivider(
+                                                width: 24,
+                                                thickness: 1,
+                                                color: Colors.white24,
                                               ),
-                                            ),
+
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      lastObservation.animalName,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 32,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    const Text(
+                                                      'is the last animal seen',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       );
@@ -269,6 +274,7 @@ class _HomeContent extends ConsumerWidget {
               child: Padding(
                 padding: EdgeInsetsGeometry.only(top: 0, right: 20, left: 20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -279,7 +285,7 @@ class _HomeContent extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textColor,
+                            color: AppColors.primaryColor,
                           ),
                         ),
 
@@ -305,7 +311,7 @@ class _HomeContent extends ConsumerWidget {
                       ],
                     ),
                     Text(
-                      'Find here all the animals you identified so far',
+                      'Find here all the last animals you identified so far',
                       style: TextStyle(color: AppColors.textColor),
                     ),
 
@@ -331,6 +337,7 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
             ),
+            SizedBox(height: 80),
           ],
         ),
       ),
@@ -389,6 +396,7 @@ class _AddObservationCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Container(
+          padding: EdgeInsets.symmetric(vertical: 40),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: AppColors.primaryColor.withValues(alpha: 0.1),

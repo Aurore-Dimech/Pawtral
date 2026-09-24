@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pawtrol/src/models/animal_model.dart';
 import 'package:pawtrol/src/views/app/animals/animals_view.dart';
 import 'package:pawtrol/src/views/app/animals/id/animal_view.dart';
 import 'package:pawtrol/src/views/app/error/error_view.dart';
@@ -10,6 +9,7 @@ import 'package:pawtrol/src/views/auth/onboarding_view.dart';
 import 'package:pawtrol/src/views/app/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pawtrol/src/views/app/scan/scan_view.dart';
+import 'package:pawtrol/src/services/observation_workflow_service.dart';
 
 import 'dart:async';
 
@@ -71,23 +71,6 @@ final appRouter = GoRouter(
           builder: (context, state) {
             return const AnimalsView();
           },
-          routes: [
-            GoRoute(
-              path: 'detail',
-              builder: (context, state) {
-                final animal = state.extra;
-
-                if (animal is! Animal) {
-                  return ErrorView(
-                    error: Exception('Animal information is missing.'),
-                  );
-                }
-
-                // return AnimalView(animal: animal);
-                return AnimalView();
-              },
-            ),
-          ],
         ),
         GoRoute(path: '/profile', builder: (context, state) => ProfileView()),
       ],
@@ -96,6 +79,23 @@ final appRouter = GoRouter(
       path: '/scan',
       builder: (context, state) {
         return const ScanView();
+      },
+    ),
+
+    GoRoute(
+      path: '/animals/detail',
+      builder: (context, state) {
+        final animal = state.extra;
+
+        if (animal is String) {
+          return AnimalView(animalName: animal);
+        }
+
+        if (animal is! ObservationDraft) {
+          return ErrorView(error: Exception('Animal name is missing.'));
+        }
+
+        return AnimalView(animalName: animal.animalName, draft: animal);
       },
     ),
   ],

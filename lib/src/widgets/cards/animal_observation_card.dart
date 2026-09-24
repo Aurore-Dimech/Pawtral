@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pawtrol/src/widgets/date/date_converter.dart';
 
 import '../../data/local/animal_observation_entity.dart';
 import '../../providers/animal_provider.dart';
@@ -14,24 +15,6 @@ class AnimalObservationCard extends StatelessWidget {
 
   const AnimalObservationCard({super.key, required this.observation});
 
-  String _subtitle(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return 'Spotted on ${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final String animalName = observation.animalName;
@@ -39,7 +22,7 @@ class AnimalObservationCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        context.push('/animals/animal', extra: animalName);
+        context.push('/animals/detail', extra: animalName);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -90,15 +73,7 @@ class AnimalObservationCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      _subtitle(observation.createdAt),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textColor.withValues(alpha: 0.6),
-                      ),
-                    ),
+                    DateConverter(date: observation.createdAt, text: "Spotted on",)
                   ],
                 ),
               ),

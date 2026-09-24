@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../providers/observation_workflow_provider.dart';
 import '../../../services/picture_service.dart';
@@ -81,19 +82,14 @@ class _ScanViewState extends ConsumerState<ScanView> {
     });
 
     try {
-      // TODO: remplacer par redirection vers la page Animal sur laquelle il y a un bouton pour sauvegarder l'animal
       final workflow = await ref.read(observationWorkflowProvider.future);
-
-      await workflow.processPicture(picture: picture, userId: user.uid);
+      final draft = await workflow.analyzePicture(picture: picture);
 
       if (!mounted) {
         return;
       }
 
-      setState(() {
-        _message = 'Animal saved locally and synchronization attempted.';
-        _isError = false;
-      });
+      context.push('/animals/detail', extra: draft);
     } catch (error) {
       if (!mounted) {
         return;
@@ -126,6 +122,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
+        leading: BackButton(),
         backgroundColor: AppColors.backgroundColor,
         elevation: 0,
         foregroundColor: AppColors.textColor,
@@ -154,10 +151,7 @@ class _ScanViewState extends ConsumerState<ScanView> {
               if (_message != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _MessageBanner(
-                    message: _message!,
-                    isError: _isError,
-                  ),
+                  child: _MessageBanner(message: _message!, isError: _isError),
                 ),
               if (!_isError && _message != null)
                 SizedBox(
@@ -177,16 +171,11 @@ class _ScanViewState extends ConsumerState<ScanView> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed:
-                                _isProcessing ? null : _takePicture,
+                            onPressed: _isProcessing ? null : _takePicture,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primaryColor,
-                              side: BorderSide(
-                                color: AppColors.primaryColor,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
+                              side: BorderSide(color: AppColors.primaryColor),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -198,16 +187,13 @@ class _ScanViewState extends ConsumerState<ScanView> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed:
-                                _isProcessing ? null : _chooseFromGallery,
+                            onPressed: _isProcessing
+                                ? null
+                                : _chooseFromGallery,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primaryColor,
-                              side: BorderSide(
-                                color: AppColors.primaryColor,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
+                              side: BorderSide(color: AppColors.primaryColor),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -218,23 +204,25 @@ class _ScanViewState extends ConsumerState<ScanView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isProcessing ? null : _processPicture,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                    if (_picture != null && !_isError)
+                      const SizedBox(height: 12),
+                    if (_picture != null && !_isError)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isProcessing ? null : _processPicture,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
+                          icon: const Icon(Icons.pets_rounded),
+                          label: const Text('Analyze'),
                         ),
-                        icon: const Icon(Icons.pets_rounded),
-                        label: const Text('Analyze and save'),
                       ),
-                    ),
                   ],
                 ),
             ],
@@ -294,10 +282,7 @@ class _PicturePreview extends StatelessWidget {
   final String imagePath;
   final bool isProcessing;
 
-  const _PicturePreview({
-    required this.imagePath,
-    required this.isProcessing,
-  });
+  const _PicturePreview({required this.imagePath, required this.isProcessing});
 
   @override
   Widget build(BuildContext context) {

@@ -141,11 +141,12 @@ class AppBottomNavigationBar extends StatelessWidget {
     required this.child,
   });
 
-  static const List<String> _paths = ['/', '/animals', '/profile'];
+  static const List<String> _paths = ['/', '/scan', '/animals', '/profile'];
 
   static const List<NavBarItem> _items = [
     NavBarItem(icon: Icons.home_rounded, label: 'Home'),
-    NavBarItem(icon: Icons.pets_rounded, label: 'Animals'),
+    NavBarItem(icon: Icons.add_a_photo_rounded, label: 'Add'),
+    NavBarItem(icon: Icons.pets_rounded, label: 'Gallery'),
     NavBarItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
 
@@ -177,7 +178,7 @@ class AppBottomNavigationBar extends StatelessWidget {
         selectedIndex: selectedIndex,
         onTap: (index) {
           if (index == selectedIndex) return;
-          context.go(_paths[index]);
+          context.push(_paths[index]);
         },
       ),
     );
