@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,9 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:pawtrol/src/data/local/animal_observation_entity.dart';
 import 'package:pawtrol/src/models/user_model.dart';
 import 'package:pawtrol/src/providers/auth_provider.dart';
-import 'package:pawtrol/src/providers/animal_provider.dart';
 import 'package:pawtrol/src/providers/local_observation_provider.dart';
 import 'package:pawtrol/src/shared/theme/app_colors.dart';
+import 'package:pawtrol/src/widgets/cards/animal_observation_card.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -314,7 +313,7 @@ class _HomeContent extends ConsumerWidget {
 
                     observations.when(
                       loading: () => const SizedBox(
-                        height: 220,
+                        height: 260,
                         child: Center(
                           child: CircularProgressIndicator(
                             color: AppColors.primaryColor,
@@ -346,26 +345,36 @@ class _AnimalCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 210,
-      child: PageView.builder(
-        controller: PageController(viewportFraction: 0.72),
-        padEnds: false,
-        itemCount: recent.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return const Padding(
-              padding: EdgeInsets.only(right: 12),
-              child: _AddObservationCard(),
-            );
-          }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = constraints.maxWidth * 0.72;
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: _AnimalObservationCard(observation: recent[index - 1]),
-          );
-        },
-      ),
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 12),
+                    child: _AddObservationCard(),
+                  ),
+                ),
+                for (final observation in recent)
+                  SizedBox(
+                    width: cardWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: AnimalObservationCard(observation: observation),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -418,153 +427,6 @@ class _AddObservationCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AnimalObservationCard extends StatelessWidget {
-  final AnimalObservationEntity observation;
-
-  const _AnimalObservationCard({required this.observation});
-
-  @override
-  Widget build(BuildContext context) {
-    final String animalName = observation.animalName;
-    final imagePath = observation.imagePath;
-
-    return GestureDetector(
-      onTap: () {
-        context.push('/animals', extra: animalName);
-      },
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 160,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-                child: _ObservationImage(
-                  animalName: animalName,
-                  imagePath: imagePath,
-                ),
-              ),
-            ),
-
-            SizedBox(
-              height: 42,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    animalName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textColor,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ObservationImage extends ConsumerStatefulWidget {
-  final String animalName;
-  final String? imagePath;
-
-  const _ObservationImage({required this.animalName, required this.imagePath});
-
-  @override
-  ConsumerState<_ObservationImage> createState() => _ObservationImageState();
-}
-
-class _ObservationImageState extends ConsumerState<_ObservationImage> {
-  String? _remoteImageUrl;
-  bool _remoteImageRequested = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.imagePath == null || widget.imagePath!.isEmpty) {
-      _requestRemoteImage();
-    } else {
-      _checkLocalImage();
-    }
-  }
-
-  Future<void> _checkLocalImage() async {
-    if (!await File(widget.imagePath!).exists() && mounted) {
-      _requestRemoteImage();
-    }
-  }
-
-  Future<void> _requestRemoteImage() async {
-    if (_remoteImageRequested) {
-      return;
-    }
-
-    _remoteImageRequested = true;
-    final imageUrl = await ref
-        .read(animalServiceProvider)
-        .fetchRandomImage(widget.animalName);
-
-    if (mounted && imageUrl != null) {
-      setState(() {
-        _remoteImageUrl = imageUrl;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_remoteImageUrl != null) {
-      return Image.network(
-        _remoteImageUrl!,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildFallback(),
-      );
-    }
-
-    if (widget.imagePath == null || widget.imagePath!.isEmpty) {
-      return _buildFallback();
-    }
-
-    return Image.file(
-      File(widget.imagePath!),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        _requestRemoteImage();
-        return _buildFallback();
-      },
-    );
-  }
-
-  Widget _buildFallback() {
-    return Container(
-      color: AppColors.secondaryColor.withValues(alpha: 0.15),
-      child: const Center(
-        child: Icon(
-          Icons.pets_rounded,
-          size: 40,
-          color: AppColors.secondaryColor,
         ),
       ),
     );
