@@ -1,4 +1,5 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../repositories/local_observation_repository.dart';
 import 'animal_ai_service.dart';
@@ -41,7 +42,9 @@ class ObservationWorkflowService {
     required String userId,
   }) async {
     final position = await locationService.getCurrentPosition();
+    final remoteId = const Uuid().v4();
     final observationId = await localObservationRepository.addObservation(
+      remoteId: remoteId,
       userId: userId,
       animalName: draft.animalName,
       imagePath: draft.imagePath,
@@ -57,7 +60,7 @@ class ObservationWorkflowService {
     try {
       await firestoreService.saveObservation(
         userId: userId,
-        observationId: observationId.toString(),
+        remoteId: remoteId,
         animalName: draft.animalName,
         imagePath: draft.imagePath,
         createdAt: observation.createdAt,

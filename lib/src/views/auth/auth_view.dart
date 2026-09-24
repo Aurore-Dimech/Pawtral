@@ -1,9 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pawtrol/src/providers/auth_provider.dart';
+import 'package:pawtrol/src/controllers/auth_controller.dart';
 import 'package:pawtrol/src/shared/theme/app_colors.dart';
 
 class AuthView extends ConsumerStatefulWidget {
@@ -52,12 +50,12 @@ class _AuthViewState extends ConsumerState<AuthView> {
     });
 
     try {
-      final authService = ref.read(authServiceProvider);
-
-      await authService.signInWithEmail(
-        emailController.text.trim(),
-        passwordController.text.trim(),
-      );
+      await ref
+          .read(authControllerProvider.notifier)
+          .login(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
       if (mounted) {
         context.go('/');
@@ -84,39 +82,19 @@ class _AuthViewState extends ConsumerState<AuthView> {
     });
 
     try {
-      final authService = ref.read(authServiceProvider);
-
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
       final name = nameController.text.trim();
       final confirmPassword = confirmPasswordController.text.trim();
 
-      if (name.isEmpty || email.isEmpty || password.isEmpty) {
-        setState(() {
-          errorMessage = 'Please complete all fields.';
-          isLoading = false;
-        });
-        return;
-      }
-
-      if (password != confirmPassword) {
-        throw Exception('Passwords do not match.');
-      }
-
-      final userCredential = await authService.signUpWithEmail(email, password);
-
-      final user = userCredential?.user;
-
-      if (user == null) {
-        throw Exception('The account could not be created.');
-      }
-
-      await authService.saveProfileInformation(
-        userId: user.uid,
-        name: name,
-        email: email,
-        createdAt: DateTime.now(),
-      );
+      await ref
+          .read(authControllerProvider.notifier)
+          .register(
+            name: name,
+            email: email,
+            password: password,
+            confirmPassword: confirmPassword,
+          );
 
       if (mounted) {
         context.go('/');

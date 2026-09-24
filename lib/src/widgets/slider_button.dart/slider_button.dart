@@ -40,9 +40,6 @@ class _SliderButtonState extends State<SliderButton>
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null) {
-      widget.controller!.addListener(reset);
-    }
     _animationController = AnimationController(
       vsync: this,
       duration: widget.animationDuration,
@@ -67,11 +64,6 @@ class _SliderButtonState extends State<SliderButton>
     _animationController.dispose();
     _arrowAnimationController.dispose();
     super.dispose();
-  }
-
-  @override
-  void reset() {
-    _animationController.reverse(from: _sliderRelativePosition);
   }
 
   @override
@@ -225,8 +217,6 @@ class _SliderButtonState extends State<SliderButton>
           }
           if (_sliderRelativePosition == 1.0) {
             widget.onSlided();
-          } else {
-            reset();
           }
         },
         child: Container(

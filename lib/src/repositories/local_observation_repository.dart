@@ -8,6 +8,7 @@ class LocalObservationRepository {
   final Isar _isar;
 
   Future<int> addObservation({
+    required String remoteId,
     required String userId,
     required String animalName,
     required String imagePath,
@@ -15,6 +16,7 @@ class LocalObservationRepository {
     double? longitude,
   }) async {
     final observation = AnimalObservationEntity()
+      ..remoteId = remoteId
       ..userId = userId
       ..animalName = animalName
       ..imagePath = imagePath
@@ -39,6 +41,7 @@ class LocalObservationRepository {
   }
 
   Future<void> saveRemoteObservation({
+    required String remoteId,
     required String userId,
     required String animalName,
     required String imagePath,
@@ -49,9 +52,10 @@ class LocalObservationRepository {
     final existing = await getAllObservations(userId);
     final alreadySaved = existing.any(
       (observation) =>
-          observation.animalName == animalName &&
-          observation.imagePath == imagePath &&
-          observation.createdAt == createdAt,
+          observation.remoteId == remoteId ||
+          (observation.animalName == animalName &&
+              observation.imagePath == imagePath &&
+              observation.createdAt == createdAt),
     );
 
     if (alreadySaved) {
@@ -59,6 +63,7 @@ class LocalObservationRepository {
     }
 
     final observation = AnimalObservationEntity()
+      ..remoteId = remoteId
       ..userId = userId
       ..animalName = animalName
       ..imagePath = imagePath

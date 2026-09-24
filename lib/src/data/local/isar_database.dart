@@ -7,9 +7,8 @@ class IsarDatabase {
   Future<Isar> open() async {
     final directory = await getApplicationDocumentsDirectory();
 
-    return Isar.open(
-      [AnimalObservationEntitySchema],
-      directory: directory.path,
-    );
+    return Isar.open([
+      AnimalObservationEntitySchema,
+    ], directory: directory.path);
   }
 }

@@ -9,7 +9,6 @@ import '../../data/local/animal_observation_entity.dart';
 import '../../providers/animal_provider.dart';
 import '../../shared/theme/app_colors.dart';
 
-
 class AnimalObservationCard extends StatelessWidget {
   final AnimalObservationEntity observation;
 
@@ -73,7 +72,14 @@ class AnimalObservationCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    DateConverter(date: observation.createdAt, text: "Spotted on",)
+                    DateConverter(
+                      date: observation.createdAt,
+                      text: "Spotted on",
+                    ),
+                    const SizedBox(height: 6),
+                    _ObservationSyncStatus(
+                      isSynchronized: observation.isSynchronized,
+                    ),
                   ],
                 ),
               ),
@@ -166,6 +172,40 @@ class _ObservationImageState extends ConsumerState<_ObservationImage> {
           color: AppColors.secondaryColor,
         ),
       ),
+    );
+  }
+}
+
+class _ObservationSyncStatus extends StatelessWidget {
+  final bool isSynchronized;
+
+  const _ObservationSyncStatus({required this.isSynchronized});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSynchronized ? Colors.green : Colors.orange;
+    final label = isSynchronized
+        ? 'Saved locally - synchronized'
+        : 'Saved locally - waiting for sync';
+
+    return Row(
+      children: [
+        Icon(
+          isSynchronized
+              ? Icons.cloud_done_rounded
+              : Icons.cloud_upload_rounded,
+          size: 14,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 11, color: color),
+          ),
+        ),
+      ],
     );
   }
 }

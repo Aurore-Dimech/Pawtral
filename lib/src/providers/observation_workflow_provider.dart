@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/animal_ai_service.dart';
-import '../services/animal_service.dart';
-import '../services/firestore_service.dart';
 import '../services/local_file_service.dart';
 import '../services/location_service.dart';
 import '../services/observation_workflow_service.dart';
@@ -22,10 +20,10 @@ final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();
 });
 
-final observationWorkflowProvider =
-    FutureProvider<ObservationWorkflowService>((ref) async {
-  final repository =
-      await ref.watch(localObservationRepositoryProvider.future);
+final observationWorkflowProvider = FutureProvider<ObservationWorkflowService>((
+  ref,
+) async {
+  final repository = await ref.watch(localObservationRepositoryProvider.future);
 
   return ObservationWorkflowService(
     animalAiService: ref.watch(animalAiServiceProvider),

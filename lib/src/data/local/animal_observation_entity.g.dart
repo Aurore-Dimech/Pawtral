@@ -48,7 +48,12 @@ const AnimalObservationEntitySchema = CollectionSchema(
       name: r'longitude',
       type: IsarType.double,
     ),
-    r'userId': PropertySchema(id: 6, name: r'userId', type: IsarType.string),
+    r'remoteId': PropertySchema(
+      id: 6,
+      name: r'remoteId',
+      type: IsarType.string,
+    ),
+    r'userId': PropertySchema(id: 7, name: r'userId', type: IsarType.string),
   },
 
   estimateSize: _animalObservationEntityEstimateSize,
@@ -74,6 +79,7 @@ int _animalObservationEntityEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.animalName.length * 3;
   bytesCount += 3 + object.imagePath.length * 3;
+  bytesCount += 3 + object.remoteId.length * 3;
   bytesCount += 3 + object.userId.length * 3;
   return bytesCount;
 }
@@ -90,7 +96,8 @@ void _animalObservationEntitySerialize(
   writer.writeBool(offsets[3], object.isSynchronized);
   writer.writeDouble(offsets[4], object.latitude);
   writer.writeDouble(offsets[5], object.longitude);
-  writer.writeString(offsets[6], object.userId);
+  writer.writeString(offsets[6], object.remoteId);
+  writer.writeString(offsets[7], object.userId);
 }
 
 AnimalObservationEntity _animalObservationEntityDeserialize(
@@ -107,7 +114,8 @@ AnimalObservationEntity _animalObservationEntityDeserialize(
   object.isSynchronized = reader.readBool(offsets[3]);
   object.latitude = reader.readDoubleOrNull(offsets[4]);
   object.longitude = reader.readDoubleOrNull(offsets[5]);
-  object.userId = reader.readString(offsets[6]);
+  object.remoteId = reader.readString(offsets[6]);
+  object.userId = reader.readString(offsets[7]);
   return object;
 }
 
@@ -131,6 +139,8 @@ P _animalObservationEntityDeserializeProp<P>(
     case 5:
       return (reader.readDoubleOrNull(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1023,6 +1033,187 @@ extension AnimalObservationEntityQueryFilter
     AnimalObservationEntity,
     QAfterFilterCondition
   >
+  remoteIdEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'remoteId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'remoteId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'remoteId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'remoteId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  remoteIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'remoteId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
   userIdEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1303,6 +1494,20 @@ extension AnimalObservationEntityQuerySortBy
   }
 
   QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByRemoteId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remoteId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByRemoteIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remoteId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
   sortByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'userId', Sort.asc);
@@ -1423,6 +1628,20 @@ extension AnimalObservationEntityQuerySortThenBy
   }
 
   QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByRemoteId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remoteId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByRemoteIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remoteId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
   thenByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'userId', Sort.asc);
@@ -1487,6 +1706,13 @@ extension AnimalObservationEntityQueryWhereDistinct
   }
 
   QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QDistinct>
+  distinctByRemoteId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'remoteId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QDistinct>
   distinctByUserId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
@@ -1546,6 +1772,13 @@ extension AnimalObservationEntityQueryProperty
   longitudeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'longitude');
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, String, QQueryOperations>
+  remoteIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'remoteId');
     });
   }
 

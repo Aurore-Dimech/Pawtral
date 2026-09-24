@@ -11,8 +11,15 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
 });
 
+final currentUserProvider = Provider<User?>((ref) {
+  return switch (ref.watch(authStateProvider)) {
+    AsyncData(:final value) => value,
+    _ => null,
+  };
+});
+
 final profileProvider = FutureProvider<AppUser?>((ref) async {
-  final user = ref.watch(authStateProvider).value;
+  final user = ref.watch(currentUserProvider);
 
   if (user == null) {
     return null;

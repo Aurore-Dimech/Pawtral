@@ -13,12 +13,14 @@ class FirestoreService {
         .collection('observations')
         .get();
 
-    return snapshot.docs.map((document) => document.data()).toList();
+    return snapshot.docs.map((document) {
+      return {...document.data(), 'remoteId': document.id};
+    }).toList();
   }
 
   Future<void> saveObservation({
     required String userId,
-    required String observationId,
+    required String remoteId,
     required String animalName,
     required String imagePath,
     required DateTime createdAt,
@@ -29,8 +31,9 @@ class FirestoreService {
         .collection('users')
         .doc(userId)
         .collection('observations')
-        .doc(observationId)
+        .doc(remoteId)
         .set({
+          'remoteId': remoteId,
           'animalName': animalName,
           'imagePath': imagePath,
           'latitude': latitude,

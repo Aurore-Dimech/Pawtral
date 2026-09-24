@@ -4,9 +4,7 @@ import 'package:firebase_ai/firebase_ai.dart';
 
 class AnimalAiService {
   AnimalAiService()
-      : _model = FirebaseAI.googleAI().generativeModel(
-          model: 'gemini-3.6-flash',
-        );
+    : _model = FirebaseAI.googleAI().generativeModel(model: 'gemini-3.6-flash');
 
   final GenerativeModel _model;
 

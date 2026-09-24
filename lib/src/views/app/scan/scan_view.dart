@@ -1,128 +1,42 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../providers/observation_workflow_provider.dart';
-import '../../../services/picture_service.dart';
+import '../../../controllers/scan_controller.dart';
 import '../../../shared/theme/app_colors.dart';
 
-class ScanView extends ConsumerStatefulWidget {
+class ScanView extends ConsumerWidget {
   const ScanView({super.key});
 
   @override
-  ConsumerState<ScanView> createState() {
-    return _ScanViewState();
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scanState = ref.watch(scanControllerProvider);
 
-class _ScanViewState extends ConsumerState<ScanView> {
-  final PictureService _pictureService = PictureService();
-
-  XFile? _picture;
-  bool _isProcessing = false;
-  String? _message;
-  bool _isError = false;
-
-  Future<void> _chooseFromGallery() async {
-    final picture = await _pictureService.pickFromGallery();
-
-    if (!mounted || picture == null) {
-      return;
-    }
-
-    setState(() {
-      _picture = picture;
-      _message = null;
-      _isError = false;
-    });
+    return scanState.when(
+      loading: () => _buildContent(context, ref, const ScanState(), true),
+      error: (error, stackTrace) =>
+          _buildContent(context, ref, const ScanState(), false, error: error),
+      data: (state) => _buildContent(context, ref, state, false),
+    );
   }
 
-  Future<void> _takePicture() async {
-    final picture = await _pictureService.takePicture();
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    ScanState state,
+    bool isLoading, {
+    Object? error,
+  }) {
+    final controller = ref.read(scanControllerProvider.notifier);
+    final picture = state.picture;
+    final message = error?.toString().replaceFirst('Exception: ', '');
 
-    if (!mounted || picture == null) {
-      return;
-    }
-
-    setState(() {
-      _picture = picture;
-      _message = null;
-      _isError = false;
-    });
-  }
-
-  Future<void> _processPicture() async {
-    final picture = _picture;
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (picture == null) {
-      setState(() {
-        _message = 'Choose or take a picture first.';
-        _isError = true;
-      });
-      return;
-    }
-
-    if (user == null) {
-      setState(() {
-        _message = 'You must be logged in.';
-        _isError = true;
-      });
-      return;
-    }
-
-    setState(() {
-      _isProcessing = true;
-      _message = null;
-      _isError = false;
-    });
-
-    try {
-      final workflow = await ref.read(observationWorkflowProvider.future);
-      final draft = await workflow.analyzePicture(picture: picture);
-
-      if (!mounted) {
-        return;
-      }
-
-      context.push('/animals/detail', extra: draft);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _message = error.toString().replaceFirst('Exception: ', '');
-        _isError = true;
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
-    }
-  }
-
-  void _reset() {
-    setState(() {
-      _picture = null;
-      _isProcessing = false;
-      _message = null;
-      _isError = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        leading: BackButton(),
+        leading: const BackButton(),
         backgroundColor: AppColors.backgroundColor,
         elevation: 0,
         foregroundColor: AppColors.textColor,
@@ -140,91 +54,65 @@ class _ScanViewState extends ConsumerState<ScanView> {
           child: Column(
             children: [
               Expanded(
-                child: _picture == null
+                child: picture == null
                     ? const _EmptyPicturePlaceholder()
                     : _PicturePreview(
-                        imagePath: _picture!.path,
-                        isProcessing: _isProcessing,
+                        imagePath: picture.path,
+                        isProcessing: state.isProcessing || isLoading,
                       ),
               ),
               const SizedBox(height: 16),
-              if (_message != null)
+              if (message != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _MessageBanner(message: _message!, isError: _isError),
+                  child: _MessageBanner(message: message, isError: true),
                 ),
-              if (!_isError && _message != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: _reset,
-                    child: Text(
-                      'Scan another animal',
-                      style: TextStyle(color: AppColors.secondaryColor),
+              if (message != null)
+                TextButton(
+                  onPressed: controller.reset,
+                  child: const Text('Try again'),
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: state.isProcessing
+                          ? null
+                          : controller.takePicture,
+                      icon: const Icon(Icons.camera_alt_rounded),
+                      label: const Text('Camera'),
                     ),
                   ),
-                )
-              else
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _isProcessing ? null : _takePicture,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primaryColor,
-                              side: BorderSide(color: AppColors.primaryColor),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            icon: const Icon(Icons.camera_alt_rounded),
-                            label: const Text('Camera'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _isProcessing
-                                ? null
-                                : _chooseFromGallery,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primaryColor,
-                              side: BorderSide(color: AppColors.primaryColor),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            icon: const Icon(Icons.photo_library_rounded),
-                            label: const Text('Gallery'),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: state.isProcessing
+                          ? null
+                          : controller.chooseFromGallery,
+                      icon: const Icon(Icons.photo_library_rounded),
+                      label: const Text('Gallery'),
                     ),
-                    if (_picture != null && !_isError)
-                      const SizedBox(height: 12),
-                    if (_picture != null && !_isError)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _isProcessing ? null : _processPicture,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          icon: const Icon(Icons.pets_rounded),
-                          label: const Text('Analyze'),
-                        ),
-                      ),
-                  ],
+                  ),
+                ],
+              ),
+              if (picture != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: state.isProcessing
+                        ? null
+                        : () async {
+                            final draft = await controller.analyzePicture();
+                            if (context.mounted && draft != null) {
+                              context.push('/animals/detail', extra: draft);
+                            }
+                          },
+                    icon: const Icon(Icons.pets_rounded),
+                    label: const Text('Analyze'),
+                  ),
                 ),
+              ],
             ],
           ),
         ),

@@ -7,12 +7,9 @@ class LocalFileService {
   Future<File> copyToApplicationDirectory(XFile picture) async {
     final directory = await getApplicationDocumentsDirectory();
 
-    final fileName =
-        '${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-    final destination = File(
-      '${directory.path}/$fileName',
-    );
+    final destination = File('${directory.path}/$fileName');
 
     return File(picture.path).copy(destination.path);
   }

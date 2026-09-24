@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pawtrol/src/models/user_model.dart';
 
+import 'package:pawtrol/src/controllers/auth_controller.dart';
 import 'package:pawtrol/src/providers/auth_provider.dart';
-import 'package:pawtrol/src/providers/local_observation_provider.dart';
 import 'package:pawtrol/src/services/auth_service.dart';
 import 'package:pawtrol/src/shared/theme/app_colors.dart';
 import 'package:pawtrol/src/widgets/date/date_converter.dart';
@@ -72,16 +72,22 @@ class _ProfileContent extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text('Delete your account?', style: TextStyle(color: AppColors.textColor),),
+        title: const Text(
+          'Delete your account?',
+          style: TextStyle(color: AppColors.textColor),
+        ),
         content: const Text(
           'This will permanently delete your account and all your data. '
           'This action cannot be undone.',
-          style: TextStyle(color: AppColors.textColor)
+          style: TextStyle(color: AppColors.textColor),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.primaryColor)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.primaryColor),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -97,7 +103,7 @@ class _ProfileContent extends ConsumerWidget {
     }
 
     try {
-      await ref.read(authServiceProvider).deleteAccount();
+      await ref.read(authControllerProvider.notifier).deleteAccount();
     } on ReauthenticationRequiredException {
       if (!context.mounted) return;
       await _promptForPasswordAndDelete(context, ref);
@@ -164,7 +170,7 @@ class _ProfileContent extends ConsumerWidget {
 
     try {
       await ref
-          .read(authServiceProvider)
+          .read(authControllerProvider.notifier)
           .reauthenticateAndDeleteAccount(password: password);
     } catch (error) {
       if (!context.mounted) return;
@@ -252,7 +258,8 @@ class _ProfileContent extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => ref.read(authServiceProvider).signOut(),
+                      onPressed: () =>
+                          ref.read(authControllerProvider.notifier).signOut(),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.redAccent,
                         side: const BorderSide(color: Colors.red),
@@ -271,16 +278,20 @@ class _ProfileContent extends ConsumerWidget {
                     child: TextButton.icon(
                       onPressed: () => _confirmDeleteAccount(context, ref),
                       style: TextButton.styleFrom(
-                        backgroundColor:  Colors.red.withValues(
-                          alpha: 0.7,
-                        ),
+                        backgroundColor: Colors.red.withValues(alpha: 0.7),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.white,),
-                      label: const Text('Delete my account', style: TextStyle(color: Colors.white),),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Delete my account',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

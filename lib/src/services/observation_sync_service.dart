@@ -31,15 +31,18 @@ class ObservationSyncService {
       for (final observation in remoteObservations) {
         final animalName = observation['animalName'];
         final imagePath = observation['imagePath'];
+        final remoteId = observation['remoteId'];
         final createdAt = observation['createdAt'];
 
         if (animalName is! String ||
+            remoteId is! String ||
             imagePath is! String ||
             createdAt is! Timestamp) {
           continue;
         }
 
         await localRepository.saveRemoteObservation(
+          remoteId: remoteId,
           userId: user.uid,
           animalName: animalName,
           imagePath: imagePath,
@@ -48,7 +51,6 @@ class ObservationSyncService {
           longitude: (observation['longitude'] as num?)?.toDouble(),
         );
       }
-
     } catch (error, stackTrace) {
       debugPrint('Firestore observation download failed: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -70,7 +72,7 @@ class ObservationSyncService {
       try {
         await firestoreService.saveObservation(
           userId: user.uid,
-          observationId: observation.id.toString(),
+          remoteId: observation.remoteId,
           animalName: observation.animalName,
           imagePath: observation.imagePath,
           createdAt: observation.createdAt,

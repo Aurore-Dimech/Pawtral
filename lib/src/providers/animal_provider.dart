@@ -6,7 +6,10 @@ final animalServiceProvider = Provider<AnimalService>((ref) {
   return AnimalService();
 });
 
-final animalProvider = FutureProvider.family<Animal, String>((ref, animal) async {
+final animalProvider = FutureProvider.family<Animal, String>((
+  ref,
+  animal,
+) async {
   final animalService = ref.watch(animalServiceProvider);
   return animalService.fetchAnimal(animal);
 });
