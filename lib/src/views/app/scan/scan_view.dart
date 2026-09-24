@@ -79,8 +79,8 @@ class ScanView extends ConsumerWidget {
                       onPressed: state.isProcessing
                           ? null
                           : controller.takePicture,
-                      icon: const Icon(Icons.camera_alt_rounded),
-                      label: const Text('Camera'),
+                      icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryColor,),
+                      label: const Text('Camera', style: TextStyle(color: AppColors.primaryColor),),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -89,8 +89,8 @@ class ScanView extends ConsumerWidget {
                       onPressed: state.isProcessing
                           ? null
                           : controller.chooseFromGallery,
-                      icon: const Icon(Icons.photo_library_rounded),
-                      label: const Text('Gallery'),
+                      icon: const Icon(Icons.photo_library_rounded, color: AppColors.primaryColor),
+                      label: const Text('Gallery', style: TextStyle(color: AppColors.primaryColor)),
                     ),
                   ),
                 ],
