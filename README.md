@@ -16,8 +16,8 @@ synchronisées vers Firestore dès que possible.
 - suppression de compte
 - prise de photo avec la caméra ou sélection depuis la galerie
 - identification de l'animal par analyse d'image avec Firebase AI / Gemini
-- récupération des informations de l'animal avec API Ninjas
-- récupération optionnelle d'une image illustrative via un appel à l'API `animals.maxz.dev`
+- récupération des informations de l'animal avec API Ninjas (ou à partir d'un résultat cachés si la requête a déjà été effectuée par le passé)
+- récupération optionnelle d'une image illustrative via l'API `animals.maxz.dev`
 - récupération de la position courante avec `geolocator`
 - stockage local hors ligne avec Isar
 - synchronisation des observations et suivi de l'état réseau
@@ -173,27 +173,27 @@ Pour le faire, je me suis basé sur les travaux suivants :
 
 ## Fonctionnement - APIs et services externes
 
-#### Firebase Core et App Check
+### Firebase Core et App Check
 
 Firebase est initialisé dans `lib/main.dart`. App Check utilise le fournisseur
 Android debug en développement, Play Integrity sur Android en production et le
 fournisseur Apple debug dans la configuration actuelle.
 
-#### Firebase Authentication
+### Firebase Authentication
 
 `lib/src/services/auth_service.dart` utilise Firebase Authentication avec
 e-mail/mot de passe pour l'inscription, la connexion et la déconnexion. La
 suppression de compte supprime le profil Firestore puis le compte Firebase ;
 une réauthentification par mot de passe peut être nécessaire.
 
-#### Firebase AI / Gemini
+### Firebase AI / Gemini
 
 `lib/src/services/animal_ai_service.dart` utilise le modèle `gemini-3.6-flash`.
 L'image JPEG sélectionnée est envoyée au modèle avec l'instruction de renvoyer
 uniquement le nom commun anglais. Si aucun animal n'est détecté, le modèle doit
 renvoyer `UNKNOWN` et l'analyse échoue.
 
-#### API Ninjas
+### API Ninjas
 
 L'API Ninjas valide et donne des informations sur l'animal identifié :
 
@@ -208,14 +208,33 @@ L'API Ninjas valide et donne des informations sur l'animal identifié :
 Le premier résultat est converti en modèle `Animal`. L'étape peut échouer si l'API renvoie une réponse vide, si la
 clef est absente ou s'il y a une erreur HTTP.
 
-#### API d'image animale
+### Système de Cache
 
-Une image aléatoire peut être demandée depuis
-`GET https://animals.maxz.dev/api/{animal}/random`. Le nom est encodé dans
-l'URL et la propriété JSON `image` est utilisée. Une erreur réseau renvoie
-`null`.
+#### 1. Cache API Ninjas
 
-#### Géolocalisation et données
+- Les réponses de l'API Ninjas sont stockées pendant 30 jours dans un cache avec Isar
+- Si un animal a déjà été recherché, les données en cache sont retournées (ce qui permet d'éviter une requête API inutile)
+- Les entrées expirées sont automatiquement supprimées lors de la récupération
+
+#### 2. Cache d'Images
+
+- Les images obtenues depuis `animals.maxz.dev` sont sauvegardées localement (à l'emplacement: `Documents/animal_images_cache/`)
+- Les images en cache persistent après redémarrage de l'app
+- Les fichiers sont indexés par animal et URL pour éviter les doublons
+- Le téléchargement n'est tenté qu'une fois par animal
+
+### API d'image animale
+
+Une image aléatoire d'un animal peut être demandée avec
+la requête `GET https://animals.maxz.dev/api/{animal}/random`. 
+
+Le nom est encodé dans l'URL et la propriété JSON `image` est utilisée. Les images téléchargées sont immédiatement mises en cache localement.
+
+Une erreur réseau
+ou une tentative de téléchargement échouée n'empêche pas la sauvegarde de
+l'observation : le fallback affiche simplement une icône.
+
+### Géolocalisation et données
 
 - `geolocator` récupère la position au moment de la sauvegarde ; elle peut être
   absente si l'autorisation est refusée ;
@@ -223,10 +242,11 @@ l'URL et la propriété JSON `image` est utilisée. Une erreur réseau renvoie
 - les profils sont stockés dans `users/{userId}` ;
 - les observations sont stockées dans `users/{userId}/observations/{remoteId}` ;
 - aucune image n'est envoyée dans Firebase Storage : Firestore conserve son
-  chemin local.
+  chemin local (photo prise) et le chemin de l'image illustrative en cache si disponible.
 
-Une observation contient notamment `remoteId`, `animalName`, `imagePath`,
-`latitude`, `longitude`, `createdAt` et `synchronizedAt`.
+Une observation Isar contient notamment `remoteId`, `animalName`, `imagePath` (photo prise),
+`cachedImagePath` (image illustrative en cache), `latitude`, `longitude`, `createdAt` et
+`isSynchronized`.
 
 ## Structure principale
 

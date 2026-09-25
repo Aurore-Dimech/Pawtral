@@ -4,6 +4,7 @@ import '../services/animal_ai_service.dart';
 import '../services/local_file_service.dart';
 import '../services/location_service.dart';
 import '../services/observation_workflow_service.dart';
+import '../services/image_cache_service.dart';
 import 'animal_provider.dart';
 import 'firestore_provider.dart';
 import 'local_observation_provider.dart';
@@ -20,6 +21,10 @@ final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();
 });
 
+final imageCacheServiceProvider = Provider<ImageCacheService>((ref) {
+  return ImageCacheService();
+});
+
 final observationWorkflowProvider = FutureProvider<ObservationWorkflowService>((
   ref,
 ) async {
@@ -27,10 +32,11 @@ final observationWorkflowProvider = FutureProvider<ObservationWorkflowService>((
 
   return ObservationWorkflowService(
     animalAiService: ref.watch(animalAiServiceProvider),
-    animalService: ref.watch(animalServiceProvider),
+    animalService: (await ref.watch(animalServiceProvider.future)),
     firestoreService: ref.watch(firestoreServiceProvider),
     localFileService: ref.watch(localFileServiceProvider),
     locationService: ref.watch(locationServiceProvider),
+    imageCacheService: ref.watch(imageCacheServiceProvider),
     localObservationRepository: repository,
   );
 });

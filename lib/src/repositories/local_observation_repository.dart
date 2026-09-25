@@ -14,6 +14,7 @@ class LocalObservationRepository {
     required String imagePath,
     double? latitude,
     double? longitude,
+    String? cachedImagePath,
   }) async {
     final observation = AnimalObservationEntity()
       ..remoteId = remoteId
@@ -23,7 +24,8 @@ class LocalObservationRepository {
       ..createdAt = DateTime.now()
       ..isSynchronized = false
       ..latitude = latitude
-      ..longitude = longitude;
+      ..longitude = longitude
+      ..cachedImagePath = cachedImagePath;
 
     await _isar.writeTxn(() async {
       await _isar.animalObservationEntitys.put(observation);

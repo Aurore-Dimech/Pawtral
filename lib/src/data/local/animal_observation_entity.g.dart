@@ -23,37 +23,42 @@ const AnimalObservationEntitySchema = CollectionSchema(
       name: r'animalName',
       type: IsarType.string,
     ),
-    r'createdAt': PropertySchema(
+    r'cachedImagePath': PropertySchema(
       id: 1,
+      name: r'cachedImagePath',
+      type: IsarType.string,
+    ),
+    r'createdAt': PropertySchema(
+      id: 2,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'imagePath': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'imagePath',
       type: IsarType.string,
     ),
     r'isSynchronized': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'isSynchronized',
       type: IsarType.bool,
     ),
     r'latitude': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'remoteId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'remoteId',
       type: IsarType.string,
     ),
-    r'userId': PropertySchema(id: 7, name: r'userId', type: IsarType.string),
+    r'userId': PropertySchema(id: 8, name: r'userId', type: IsarType.string),
   },
 
   estimateSize: _animalObservationEntityEstimateSize,
@@ -78,6 +83,12 @@ int _animalObservationEntityEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.animalName.length * 3;
+  {
+    final value = object.cachedImagePath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.imagePath.length * 3;
   bytesCount += 3 + object.remoteId.length * 3;
   bytesCount += 3 + object.userId.length * 3;
@@ -91,13 +102,14 @@ void _animalObservationEntitySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.animalName);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeString(offsets[2], object.imagePath);
-  writer.writeBool(offsets[3], object.isSynchronized);
-  writer.writeDouble(offsets[4], object.latitude);
-  writer.writeDouble(offsets[5], object.longitude);
-  writer.writeString(offsets[6], object.remoteId);
-  writer.writeString(offsets[7], object.userId);
+  writer.writeString(offsets[1], object.cachedImagePath);
+  writer.writeDateTime(offsets[2], object.createdAt);
+  writer.writeString(offsets[3], object.imagePath);
+  writer.writeBool(offsets[4], object.isSynchronized);
+  writer.writeDouble(offsets[5], object.latitude);
+  writer.writeDouble(offsets[6], object.longitude);
+  writer.writeString(offsets[7], object.remoteId);
+  writer.writeString(offsets[8], object.userId);
 }
 
 AnimalObservationEntity _animalObservationEntityDeserialize(
@@ -108,14 +120,15 @@ AnimalObservationEntity _animalObservationEntityDeserialize(
 ) {
   final object = AnimalObservationEntity();
   object.animalName = reader.readString(offsets[0]);
-  object.createdAt = reader.readDateTime(offsets[1]);
+  object.cachedImagePath = reader.readStringOrNull(offsets[1]);
+  object.createdAt = reader.readDateTime(offsets[2]);
   object.id = id;
-  object.imagePath = reader.readString(offsets[2]);
-  object.isSynchronized = reader.readBool(offsets[3]);
-  object.latitude = reader.readDoubleOrNull(offsets[4]);
-  object.longitude = reader.readDoubleOrNull(offsets[5]);
-  object.remoteId = reader.readString(offsets[6]);
-  object.userId = reader.readString(offsets[7]);
+  object.imagePath = reader.readString(offsets[3]);
+  object.isSynchronized = reader.readBool(offsets[4]);
+  object.latitude = reader.readDoubleOrNull(offsets[5]);
+  object.longitude = reader.readDoubleOrNull(offsets[6]);
+  object.remoteId = reader.readString(offsets[7]);
+  object.userId = reader.readString(offsets[8]);
   return object;
 }
 
@@ -129,18 +142,20 @@ P _animalObservationEntityDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
       return (reader.readDoubleOrNull(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -454,6 +469,213 @@ extension AnimalObservationEntityQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'animalName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'cachedImagePath'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'cachedImagePath'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cachedImagePath',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cachedImagePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cachedImagePath',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'cachedImagePath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    AnimalObservationEntity,
+    AnimalObservationEntity,
+    QAfterFilterCondition
+  >
+  cachedImagePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'cachedImagePath', value: ''),
       );
     });
   }
@@ -1424,6 +1646,20 @@ extension AnimalObservationEntityQuerySortBy
   }
 
   QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByCachedImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cachedImagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  sortByCachedImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cachedImagePath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
   sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1540,6 +1776,20 @@ extension AnimalObservationEntityQuerySortThenBy
   thenByAnimalNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'animalName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByCachedImagePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cachedImagePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QAfterSortBy>
+  thenByCachedImagePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cachedImagePath', Sort.desc);
     });
   }
 
@@ -1671,6 +1921,16 @@ extension AnimalObservationEntityQueryWhereDistinct
   }
 
   QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QDistinct>
+  distinctByCachedImagePath({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'cachedImagePath',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, AnimalObservationEntity, QDistinct>
   distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -1737,6 +1997,13 @@ extension AnimalObservationEntityQueryProperty
   animalNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'animalName');
+    });
+  }
+
+  QueryBuilder<AnimalObservationEntity, String?, QQueryOperations>
+  cachedImagePathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cachedImagePath');
     });
   }
 

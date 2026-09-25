@@ -326,9 +326,8 @@ class _AnimalHeroImageState extends ConsumerState<_AnimalHeroImage> {
     }
 
     _requested = true;
-    final imageUrl = await ref
-        .read(animalServiceProvider)
-        .fetchRandomImage(widget.animalName);
+    final animalService = await ref.read(animalServiceProvider.future);
+    final imageUrl = await animalService.fetchRandomImage(widget.animalName);
 
     if (mounted && imageUrl != null) {
       setState(() {

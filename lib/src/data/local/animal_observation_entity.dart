@@ -15,4 +15,6 @@ class AnimalObservationEntity {
 
   double? latitude;
   double? longitude;
+
+  String? cachedImagePath;
 }

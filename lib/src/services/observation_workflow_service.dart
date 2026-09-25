@@ -7,6 +7,7 @@ import 'animal_service.dart';
 import 'firestore_service.dart';
 import 'local_file_service.dart';
 import 'location_service.dart';
+import 'image_cache_service.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -18,6 +19,7 @@ class ObservationWorkflowService {
     required this.localFileService,
     required this.locationService,
     required this.localObservationRepository,
+    required this.imageCacheService,
   });
 
   final AnimalAiService animalAiService;
@@ -26,6 +28,7 @@ class ObservationWorkflowService {
   final LocalFileService localFileService;
   final LocationService locationService;
   final LocalObservationRepository localObservationRepository;
+  final ImageCacheService imageCacheService;
 
   Future<ObservationDraft> analyzePicture({required XFile picture}) async {
     final localImage = await localFileService.copyToApplicationDirectory(
@@ -43,6 +46,20 @@ class ObservationWorkflowService {
   }) async {
     final position = await locationService.getCurrentPosition();
     final remoteId = const Uuid().v4();
+
+    String? cachedImagePath;
+    try {
+      final imageUrl = await animalService.fetchRandomImage(draft.animalName);
+      if (imageUrl != null) {
+        cachedImagePath = await imageCacheService.downloadAndCacheImage(
+          imageUrl,
+          draft.animalName,
+        );
+      }
+    } catch (error) {
+      debugPrint('Failed to download animal image: $error');
+    }
+
     final observationId = await localObservationRepository.addObservation(
       remoteId: remoteId,
       userId: userId,
@@ -50,6 +67,7 @@ class ObservationWorkflowService {
       imagePath: draft.imagePath,
       latitude: position?.latitude,
       longitude: position?.longitude,
+      cachedImagePath: cachedImagePath,
     );
     final observation = await localObservationRepository.getById(observationId);
 

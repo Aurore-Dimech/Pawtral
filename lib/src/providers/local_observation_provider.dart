@@ -5,6 +5,7 @@ import '../data/local/animal_observation_entity.dart';
 import '../data/local/isar_database.dart';
 import '../repositories/local_observation_repository.dart';
 import '../services/observation_sync_service.dart';
+import '../services/animal_cache_service.dart';
 import 'firestore_provider.dart';
 
 final isarProvider = FutureProvider<Isar>((ref) async {
@@ -16,6 +17,13 @@ final isarProvider = FutureProvider<Isar>((ref) async {
   });
 
   return isar;
+});
+
+final animalCacheServiceProvider = FutureProvider<AnimalCacheService>((
+  ref,
+) async {
+  final isar = await ref.watch(isarProvider.future);
+  return AnimalCacheService(isar);
 });
 
 final localObservationRepositoryProvider =

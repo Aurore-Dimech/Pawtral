@@ -127,9 +127,8 @@ class _ObservationImageState extends ConsumerState<_ObservationImage> {
     }
 
     _remoteImageRequested = true;
-    final imageUrl = await ref
-        .read(animalServiceProvider)
-        .fetchRandomImage(widget.animalName);
+    final animalService = await ref.read(animalServiceProvider.future);
+    final imageUrl = await animalService.fetchRandomImage(widget.animalName);
 
     if (mounted && imageUrl != null) {
       setState(() {
