@@ -3,10 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pawtrol/src/models/animal_model.dart';
 
+import 'dart:io';
+
 import 'package:pawtrol/src/providers/animal_provider.dart';
+import 'package:pawtrol/src/providers/auth_provider.dart';
+import 'package:pawtrol/src/providers/local_observation_provider.dart';
 import 'package:pawtrol/src/controllers/observation_controller.dart';
 import 'package:pawtrol/src/services/observation_workflow_service.dart';
 import 'package:pawtrol/src/shared/theme/app_colors.dart';
+import 'package:pawtrol/src/widgets/map/location_map.dart';
 
 class AnimalView extends ConsumerWidget {
   final String animalName;
@@ -99,10 +104,33 @@ class _AnimalContent extends ConsumerWidget {
     );
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final user = ref.watch(currentUserProvider);
+
+    var previousObservation;
+
+    if (user != null) {
+      final animalObsAsync = ref.watch(
+        animalObservationsProvider((user.uid, animalName)),
+      );
+      if (animalObsAsync.hasValue && animalObsAsync.value != null) {
+        for (final obs in animalObsAsync.value!) {
+          if (obs.latitude != null && obs.longitude != null) {
+            previousObservation = obs;
+            break;
+          }
+        }
+      }
+    }
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        _AnimalHeroImage(animalName: animalName),
+        _AnimalHeroImage(
+          animalName: animalName,
+          draftImagePath: draft?.imagePath,
+          previousObservationImagePath: previousObservation?.imagePath,
+          cachedImagePath: previousObservation?.cachedImagePath,
+        ),
 
         Align(
           alignment: Alignment.bottomCenter,
@@ -252,23 +280,60 @@ class _AnimalContent extends ConsumerWidget {
                     ),
 
                     const SizedBox(height: 24),
+
+                    if (draft != null &&
+                        draft!.latitude != null &&
+                        draft!.longitude != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: LocationMap(
+                          latitude: draft!.latitude!,
+                          longitude: draft!.longitude!,
+                          animalName: animalName,
+                        ),
+                      )
+                    else if (previousObservation != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: LocationMap(
+                          latitude: previousObservation.latitude!,
+                          longitude: previousObservation.longitude!,
+                          animalName: animalName,
+                        ),
+                      ),
+
                     if (draft != null)
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              return AppColors.primaryColor;
+                            }),
+                          ),
                           onPressed: isSaving
                               ? null
                               : () => _saveAnimal(context, ref),
+
                           icon: isSaving
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
+                                    color: Colors.white,
                                   ),
                                 )
-                              : const Icon(Icons.bookmark_add_rounded),
-                          label: Text(isSaving ? 'Saving...' : 'Save animal'),
+                              : const Icon(
+                                  Icons.bookmark_add_rounded,
+                                  color: Colors.white,
+                                ),
+                          label: Text(
+                            isSaving ? 'Saving...' : 'Save animal',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                   ],
@@ -284,6 +349,7 @@ class _AnimalContent extends ConsumerWidget {
             child: Align(
               alignment: Alignment.topLeft,
               child: BackButton(
+                color: AppColors.primaryColor,
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.resolveWith((states) {
                     return AppColors.backgroundColor;
@@ -303,8 +369,16 @@ class _AnimalContent extends ConsumerWidget {
 
 class _AnimalHeroImage extends ConsumerStatefulWidget {
   final String animalName;
+  final String? draftImagePath;
+  final String? previousObservationImagePath;
+  final String? cachedImagePath;
 
-  const _AnimalHeroImage({required this.animalName});
+  const _AnimalHeroImage({
+    required this.animalName,
+    this.draftImagePath,
+    this.previousObservationImagePath,
+    this.cachedImagePath,
+  });
 
   @override
   ConsumerState<_AnimalHeroImage> createState() => _AnimalHeroImageState();
@@ -338,6 +412,34 @@ class _AnimalHeroImageState extends ConsumerState<_AnimalHeroImage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.draftImagePath != null) {
+      return Image.file(
+        File(widget.draftImagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildApiOrFallback(),
+      );
+    }
+
+    if (widget.previousObservationImagePath != null) {
+      return Image.file(
+        File(widget.previousObservationImagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildApiOrFallback(),
+      );
+    }
+
+    if (widget.cachedImagePath != null) {
+      return Image.file(
+        File(widget.cachedImagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildApiOrFallback(),
+      );
+    }
+
+    return _buildApiOrFallback();
+  }
+
+  Widget _buildApiOrFallback() {
     if (_imageUrl == null) {
       return _buildFallback();
     }
@@ -378,7 +480,11 @@ Widget _infoBox(String label, String characteristic) {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w300,
+              color: AppColors.textColor,
+            ),
           ),
           SizedBox(height: 4),
           SizedBox(
@@ -387,7 +493,11 @@ Widget _infoBox(String label, String characteristic) {
               characteristic.isNotEmpty ? characteristic : "unknow",
               textAlign: TextAlign.center,
               softWrap: true,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textColor,
+              ),
             ),
           ),
         ],
@@ -401,13 +511,24 @@ Widget _infoLine(String label, String characteristic) {
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w300)),
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w300,
+          color: AppColors.textColor,
+        ),
+      ),
       SizedBox(width: 16),
       Expanded(
         child: Text(
           characteristic.isNotEmpty ? characteristic : "unknow",
           textAlign: TextAlign.right,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textColor,
+          ),
         ),
       ),
     ],

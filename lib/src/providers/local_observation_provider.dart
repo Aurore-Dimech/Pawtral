@@ -1,3 +1,5 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
@@ -44,19 +46,67 @@ final observationSyncServiceProvider = FutureProvider<ObservationSyncService>((
   );
 });
 
+final connectivityStreamProvider = StreamProvider<bool>((ref) async* {
+  final connectivity = Connectivity();
+  final initialResults = await connectivity.checkConnectivity();
+  yield !initialResults.contains(ConnectivityResult.none);
+
+  yield* connectivity.onConnectivityChanged.map((results) {
+    final isOnline = !results.contains(ConnectivityResult.none);
+    debugPrint('Connectivity changed: isOnline=$isOnline');
+    return isOnline;
+  });
+});
+
 final localObservationsProvider =
     FutureProvider.family<List<AnimalObservationEntity>, String>((
       ref,
       userId,
     ) async {
-      final syncService = await ref.watch(
-        observationSyncServiceProvider.future,
-      );
-      await syncService.synchronize();
-
       final repository = await ref.watch(
         localObservationRepositoryProvider.future,
       );
 
-      return repository.getAllObservations(userId);
+      final asyncConnectivity = ref.watch(connectivityStreamProvider);
+      final isOnline = asyncConnectivity.when(
+        data: (value) => value,
+        loading: () => false,
+        error: (error, stack) => false,
+      );
+
+      if (isOnline) {
+        try {
+          final syncService = await ref.watch(
+            observationSyncServiceProvider.future,
+          );
+          await syncService.synchronize().timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint('Sync timeout (10s)');
+            },
+          );
+        } catch (error, stackTrace) {
+          debugPrint('Error: $error');
+          debugPrintStack(stackTrace: stackTrace);
+        }
+      } else {
+        debugPrint('Offline mode - skipping sync');
+      }
+
+      final localObservations = await repository.getAllObservations(userId);
+
+      return localObservations;
+    });
+
+final animalObservationsProvider =
+    FutureProvider.family<List<AnimalObservationEntity>, (String, String)>((
+      ref,
+      params,
+    ) async {
+      final (userId, animalName) = params;
+      final observations = await ref.watch(
+        localObservationsProvider(userId).future,
+      );
+
+      return observations.where((obs) => obs.animalName == animalName).toList();
     });

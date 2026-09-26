@@ -95,13 +95,15 @@ class LocalObservationRepository {
 
   Future<List<AnimalObservationEntity>> getUnsynchronizedObservations(
     String userId,
-  ) {
-    return _isar.animalObservationEntitys
+  ) async {
+    final observations = await _isar.animalObservationEntitys
         .filter()
         .userIdEqualTo(userId)
         .and()
         .isSynchronizedEqualTo(false)
         .findAll();
+
+    return observations;
   }
 
   Future<AnimalObservationEntity?> getById(int observationId) {

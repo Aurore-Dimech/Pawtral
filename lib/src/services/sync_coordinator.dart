@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import 'observation_sync_service.dart';
 
@@ -28,22 +29,33 @@ class SyncCoordinator {
     _started = true;
 
     await synchronize();
+
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
       results,
     ) {
-      if (results.any((result) => result != ConnectivityResult.none)) {
+      final isOnline = !results.contains(ConnectivityResult.none);
+      if (isOnline) {
         synchronize();
+      } else {
+        debugPrint('Offline');
       }
     });
+
     _authSubscription = _auth.authStateChanges().listen((user) {
       if (user != null) {
         synchronize();
+      } else {
+        debugPrint('Disconnected');
       }
     });
   }
 
   Future<void> synchronize() {
-    return _runningSynchronization ??= _syncService.synchronize().whenComplete(
+    if (_runningSynchronization != null) {
+      return _runningSynchronization!;
+    }
+
+    return _runningSynchronization = _syncService.synchronize().whenComplete(
       () {
         _runningSynchronization = null;
       },

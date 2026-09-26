@@ -37,14 +37,27 @@ class ObservationWorkflowService {
     final animalName = await animalAiService.identifyAnimal(localImage);
     await animalService.fetchAnimal(animalName);
 
-    return ObservationDraft(animalName: animalName, imagePath: localImage.path);
+    final position = await locationService.getCurrentPosition();
+
+    return ObservationDraft(
+      animalName: animalName,
+      imagePath: localImage.path,
+      latitude: position?.latitude,
+      longitude: position?.longitude,
+    );
   }
 
   Future<int> saveDraft({
     required ObservationDraft draft,
     required String userId,
   }) async {
-    final position = await locationService.getCurrentPosition();
+    final latitude =
+        draft.latitude ??
+        (await locationService.getCurrentPosition())?.latitude;
+    final longitude =
+        draft.longitude ??
+        (await locationService.getCurrentPosition())?.longitude;
+
     final remoteId = const Uuid().v4();
 
     String? cachedImagePath;
@@ -65,8 +78,8 @@ class ObservationWorkflowService {
       userId: userId,
       animalName: draft.animalName,
       imagePath: draft.imagePath,
-      latitude: position?.latitude,
-      longitude: position?.longitude,
+      latitude: latitude,
+      longitude: longitude,
       cachedImagePath: cachedImagePath,
     );
     final observation = await localObservationRepository.getById(observationId);
@@ -76,18 +89,27 @@ class ObservationWorkflowService {
     }
 
     try {
-      await firestoreService.saveObservation(
-        userId: userId,
-        remoteId: remoteId,
-        animalName: draft.animalName,
-        imagePath: draft.imagePath,
-        createdAt: observation.createdAt,
-        latitude: position?.latitude,
-        longitude: position?.longitude,
-      );
+      await firestoreService
+          .saveObservation(
+            userId: userId,
+            remoteId: remoteId,
+            animalName: draft.animalName,
+            imagePath: draft.imagePath,
+            createdAt: observation.createdAt,
+            latitude: latitude,
+            longitude: longitude,
+          )
+          .timeout(
+            const Duration(seconds: 8),
+            onTimeout: () {
+              debugPrint('Firestore sync timeout');
+              throw Exception('Firestore timeout');
+            },
+          );
+
       await localObservationRepository.markAsSynchronized(observationId);
     } catch (error, stackTrace) {
-      debugPrint('Firestore synchronization failed: $error');
+      debugPrint('Error: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
 
@@ -104,8 +126,15 @@ class ObservationWorkflowService {
 }
 
 class ObservationDraft {
-  const ObservationDraft({required this.animalName, required this.imagePath});
+  const ObservationDraft({
+    required this.animalName,
+    required this.imagePath,
+    this.latitude,
+    this.longitude,
+  });
 
   final String animalName;
   final String imagePath;
+  final double? latitude;
+  final double? longitude;
 }

@@ -21,7 +21,12 @@ class ObservationSyncService {
       return;
     }
 
-    await synchronizePending();
+    try {
+      await synchronizePending();
+    } catch (error, stackTrace) {
+      debugPrint('Error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
 
     try {
       final remoteObservations = await firestoreService.getObservations(
@@ -41,18 +46,23 @@ class ObservationSyncService {
           continue;
         }
 
-        await localRepository.saveRemoteObservation(
-          remoteId: remoteId,
-          userId: user.uid,
-          animalName: animalName,
-          imagePath: imagePath,
-          createdAt: createdAt.toDate(),
-          latitude: (observation['latitude'] as num?)?.toDouble(),
-          longitude: (observation['longitude'] as num?)?.toDouble(),
-        );
+        try {
+          await localRepository.saveRemoteObservation(
+            remoteId: remoteId,
+            userId: user.uid,
+            animalName: animalName,
+            imagePath: imagePath,
+            createdAt: createdAt.toDate(),
+            latitude: (observation['latitude'] as num?)?.toDouble(),
+            longitude: (observation['longitude'] as num?)?.toDouble(),
+          );
+        } catch (error, stackTrace) {
+          debugPrint('Error: $error');
+          debugPrintStack(stackTrace: stackTrace);
+        }
       }
     } catch (error, stackTrace) {
-      debugPrint('Firestore observation download failed: $error');
+      debugPrint('Error: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
@@ -82,9 +92,7 @@ class ObservationSyncService {
 
         await localRepository.markAsSynchronized(observation.id);
       } catch (error, stackTrace) {
-        debugPrint(
-          'Pending observation ${observation.id} failed to synchronize: $error',
-        );
+        debugPrint('Error: $error');
         debugPrintStack(stackTrace: stackTrace);
       }
     }
