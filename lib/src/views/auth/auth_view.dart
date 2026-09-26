@@ -117,6 +117,7 @@ class _AuthViewState extends ConsumerState<AuthView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           // Background image:
@@ -127,39 +128,55 @@ class _AuthViewState extends ConsumerState<AuthView> {
             ),
           ),
 
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsetsGeometry.all(40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedOpacity(
-                    opacity: opacity,
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeIn,
+          // Content:
+          Positioned.fill(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight:
+                        MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom -
+                        MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(40),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(tabs.length, (index) {
-                            final isSelected = _activeTab == index;
-                            return tag(index, isSelected);
-                          }),
+                        AnimatedOpacity(
+                          opacity: opacity,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeIn,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: List.generate(tabs.length, (index) {
+                                  final isSelected = _activeTab == index;
+                                  return tag(index, isSelected);
+                                }),
+                              ),
+                              SizedBox(height: 12),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: 12),
+                        AnimatedOpacity(
+                          opacity: opacity,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeIn,
+                          child: _activeTab == 0
+                              ? _buildSignInForm()
+                              : _buildSignUpForm(),
+                        ),
                       ],
                     ),
                   ),
-                  AnimatedOpacity(
-                    opacity: opacity,
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeIn,
-                    child: _activeTab == 0
-                        ? _buildSignInForm()
-                        : _buildSignUpForm(),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -245,18 +262,16 @@ class _AuthViewState extends ConsumerState<AuthView> {
                 ? AppColors.primaryColor.withValues(alpha: 0.5)
                 : AppColors.primaryColor,
           ),
-          child: Container(
-            child: Center(
-              child: isLoading
-                  ? SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryColor,
-                      ),
-                    )
-                  : const Text('Login', style: TextStyle(color: Colors.white)),
-            ),
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
+                    ),
+                  )
+                : const Text('Login', style: TextStyle(color: Colors.white)),
           ),
         ),
       ],
@@ -297,21 +312,19 @@ class _AuthViewState extends ConsumerState<AuthView> {
                 ? AppColors.primaryColor.withValues(alpha: 0.5)
                 : AppColors.primaryColor,
           ),
-          child: Container(
-            child: Center(
-              child: isLoading
-                  ? SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryColor,
-                      ),
-                    )
-                  : const Text(
-                      'Create account',
-                      style: TextStyle(color: Colors.white),
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
                     ),
-            ),
+                  )
+                : const Text(
+                    'Create account',
+                    style: TextStyle(color: Colors.white),
+                  ),
           ),
         ),
       ],

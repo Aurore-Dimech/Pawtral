@@ -16,11 +16,15 @@ synchronisées vers Firestore dès que possible.
 - suppression de compte
 - prise de photo avec la caméra ou sélection depuis la galerie
 - identification de l'animal par analyse d'image avec Firebase AI / Gemini
-- récupération des informations de l'animal avec API Ninjas (ou à partir d'un résultat cachés si la requête a déjà été effectuée par le passé)
+- récupération des informations de l'animal avec API Ninjas (ou à partir d'un résultat mis en cache si la requête a déjà été effectuée par le passé)
 - récupération optionnelle d'une image illustrative via l'API `animals.maxz.dev`
 - récupération de la position courante avec `geolocator`
 - stockage local hors ligne avec Isar
 - synchronisation des observations et suivi de l'état réseau
+- affichage du statut de synchronisation de la sauvegarde locale par rapport au cloud (en attente / synchronisé)
+- synchronisation automatique quand la connexion WiFi/réseau est rétablie
+- affichage immédiat des observations en galerie même hors-ligne
+- affichage d'une carte interactive montrant l'emplacement des photos
 - consultation de la galerie des observations, de statistiques sur les observations, et du profil utilisateur
 
 ## Installation
@@ -226,7 +230,7 @@ clef est absente ou s'il y a une erreur HTTP.
 ### API d'image animale
 
 Une image aléatoire d'un animal peut être demandée avec
-la requête `GET https://animals.maxz.dev/api/{animal}/random`. 
+la requête `GET https://animals.maxz.dev/api/{animal}/random`.
 
 Le nom est encodé dans l'URL et la propriété JSON `image` est utilisée. Les images téléchargées sont immédiatement mises en cache localement.
 
@@ -247,6 +251,48 @@ l'observation : le fallback affiche simplement une icône.
 Une observation Isar contient notamment `remoteId`, `animalName`, `imagePath` (photo prise),
 `cachedImagePath` (image illustrative en cache), `latitude`, `longitude`, `createdAt` et
 `isSynchronized`.
+
+### Synchronisation hors-ligne et en temps réel
+
+#### 1. Architecture
+
+- Les observations sont directement sauvegardées en local avec Isar
+- Une tentative de synchronisation Firestore est effectuée avec un timeout de 8 secondes
+- Si Firestore échoue (pas de connexion/ timeout/ etc.), l'observation reste marquée comme `isSynchronized=false`
+- Un service de synchronisation en arrière-plan (`SyncCoordinator`) écoute les changements de connectivité
+
+#### 2. Détection de connectivité
+
+Le provider `connectivityStreamProvider` émet en temps réel l'état de connexion :
+
+- Vérifie l'état initial à l'ouverture de l'app
+- Écoute les changements via `connectivity_plus`
+- Redéclenche automatiquement les fournisseurs Riverpod quand la connexion change
+
+#### 3. Synchronisation automatique
+
+Quand la connexion WiFi/réseau est rétablie :
+
+1. `connectivityStreamProvider` émet `isOnline=true`
+2. `SyncCoordinator` appelle `synchronize()`
+3. Les observations non synchronisées sont envoyées à Firestore
+4. `isSynchronized` passe de `false` à `true` dans Isar pour les observations nouvellement synchronisées
+5. `localObservationsProvider` est automatiquement rafraîchi
+6. L'UI affiche le nouveau statut (icône + texte mis à jour)
+
+#### 4. Affichage en galerie et slider
+
+- Les observations sauvegardées hors-ligne apparaissent dans la galerie et le slider de la home
+- Le statut de synchronisation est visible via une icône et un label dans chaque carte d'observation :
+  - `cloud_done` + "Saved locally - synchronized" : observation synchronisée à Firestore
+  - `cloud_upload` + "Saved locally - waiting for sync" : en attente de synchronisation
+
+### Carte de localisation
+
+- Une carte interactive s'affiche sur la fiche de chaque animal
+- La carte montre l'emplacement de la photo avec ses coordonnées
+- Utilise [flutter_map](https://pub.dev/packages/flutter_map)
+- La carte n'apparaît que si des coordonnées sont disponibles
 
 ## Structure principale
 

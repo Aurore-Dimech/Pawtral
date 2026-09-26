@@ -70,7 +70,7 @@ class ScanView extends ConsumerWidget {
               if (message != null)
                 TextButton(
                   onPressed: controller.reset,
-                  child: const Text('Try again'),
+                  child: const Text('Try again', style: TextStyle(color: AppColors.primaryColor),),
                 ),
               Row(
                 children: [
@@ -79,8 +79,14 @@ class ScanView extends ConsumerWidget {
                       onPressed: state.isProcessing
                           ? null
                           : controller.takePicture,
-                      icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryColor,),
-                      label: const Text('Camera', style: TextStyle(color: AppColors.primaryColor),),
+                      icon: const Icon(
+                        Icons.camera_alt_rounded,
+                        color: AppColors.primaryColor,
+                      ),
+                      label: const Text(
+                        'Camera',
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -89,8 +95,14 @@ class ScanView extends ConsumerWidget {
                       onPressed: state.isProcessing
                           ? null
                           : controller.chooseFromGallery,
-                      icon: const Icon(Icons.photo_library_rounded, color: AppColors.primaryColor),
-                      label: const Text('Gallery', style: TextStyle(color: AppColors.primaryColor)),
+                      icon: const Icon(
+                        Icons.photo_library_rounded,
+                        color: AppColors.primaryColor,
+                      ),
+                      label: const Text(
+                        'Gallery',
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
                     ),
                   ),
                 ],
@@ -108,8 +120,15 @@ class ScanView extends ConsumerWidget {
                               context.push('/animals/detail', extra: draft);
                             }
                           },
-                    icon: const Icon(Icons.pets_rounded),
-                    label: const Text('Analyze'),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.resolveWith((
+                        states,
+                      ) {
+                        return AppColors.primaryColor;
+                      }),
+                    ),
+                    icon: const Icon(Icons.pets_rounded, color: Colors.white,),
+                    label: const Text('Analyze', style: TextStyle(color: Colors.white),),
                   ),
                 ),
               ],
